@@ -75,7 +75,9 @@ Hooks.once("init", () => {
 Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
   const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
 
-  //SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(app, detailsContent, data);
+  SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(detailsContent, data);
+  SlotBasedEncumberanceManager.handleLockedTidyItemSheetSlots(detailsContent, data);
+  SlotBasedEncumberanceManager.replaceItemWeightValue(html, data);
   const type = data.data.type;
 
   // Only weapons and armor/equipment
@@ -162,9 +164,15 @@ Hooks.on("renderTidy5eCharacterSheetQuadrone" as any, async (app: any, html: HTM
 });
 
 Hooks.on("tidy5e-sheet.sheetModeConfiguring" as any, (app: any, html: HTMLElement, { unlocked }: any) => {
-  console.log("UNLOCKED:", unlocked);
-  const slotsInput = html.querySelector("input.better-items-slots") as HTMLInputElement;
-  slotsInput.disabled = !unlocked;
+  /*console.log("UNLOCKED:", unlocked);
+  console.log("APP:", app);
+  console.log("HTML:", html);
+  if (!html) return;
+  const inputs = html.querySelectorAll("input.better-items-slots");
+  console.log("INPUTS:", inputs);
+  for (const input of inputs) {
+    input.disabled = !unlocked;
+  }*/
 });
 
 Hooks.on("closeTidy5eCharacterSheetQuadrone" as any, async (app: any) => {

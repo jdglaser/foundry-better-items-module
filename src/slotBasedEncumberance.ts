@@ -138,11 +138,22 @@ export class SlotBasedEncumberanceManager {
     }
   }
 
-  static replaceTidyItemSheetSlots(app: any, detailsContent: HTMLElement, data: any) {
-    console.log("APP:", app);
-    console.log("DATA:", data);
+  static #formatSlotsShorthand({ value, stack, tiny }: { value: number; stack: number; tiny: boolean }) {
+    if (tiny) {
+      return "Tiny";
+    }
+
+    const stackText = stack === 1 ? "" : ` (Stack: x${stack})`;
+    return `${value}${stackText}`;
+  }
+
+  static replaceTidyItemSheetSlots(detailsContent: HTMLElement, data: any) {
+    if (detailsContent.querySelector(".better-items-slots-group")) {
+      return;
+    }
+
     const weightGroup = detailsContent.querySelector(".form-group label[for$='-weight-value']")?.closest(".form-group");
-    console.log(weightGroup);
+    weightGroup?.classList.add("better-items-slots-group");
     const label = weightGroup?.querySelector("label") as HTMLElement;
     label.innerHTML = "Slots";
     const formFields = weightGroup?.querySelector("div.form-fields");
@@ -166,7 +177,6 @@ export class SlotBasedEncumberanceManager {
 
     slotsInputContainer.replaceChildren(slotsLabel, slotsInput);
 
-    //if (!data.unlocked) slotsInput.disabled = true;
     slotsInput.setAttribute("data-tidy-field", "flags.dnd5e-better-item-properties.slots");
 
     // Stack
@@ -176,6 +186,7 @@ export class SlotBasedEncumberanceManager {
     stackLabel.innerHTML = "Stack";
 
     const stackInput = document.createElement("input");
+    stackInput.classList.add("better-items-slots");
     stackInput.type = "number";
     stackInput.min = "0";
     stackInput.value = data.system.slots.stack;
@@ -187,8 +198,6 @@ export class SlotBasedEncumberanceManager {
 
     stackInputContainer.replaceChildren(stackLabel, stackInput);
 
-    //if (!data.unlocked) stackInput.disabled = true;
-
     // Tiny
     const tinyInputContainer = document.createElement("div");
     tinyInputContainer.classList.add("form-group", "label-top");
@@ -197,20 +206,32 @@ export class SlotBasedEncumberanceManager {
     tinyLabel.innerHTML = "Tiny";
 
     const tinyInput = document.createElement("input");
+    tinyInput.classList.add("better-items-slots");
     tinyInput.type = "checkbox";
     tinyInput.checked = data.system.slots.tiny;
 
     tinyInput.addEventListener("change", async (ev) => {
       const checked = (ev.target as HTMLInputElement).checked;
-      console.log("DATA:", data);
       await data.system.parent.setFlag("dnd5e-better-item-properties", "tiny", checked);
     });
 
     tinyInputContainer.replaceChildren(tinyLabel, tinyInput);
 
-    //if (!data.unlocked) tinyInput.disabled = true;
-
     formFields?.replaceChildren(slotsInputContainer, stackInputContainer, tinyInputContainer);
+  }
+
+  static replaceItemWeightValue(headerHtml: HTMLElement, data: any) {
+    const itemWeightValue = headerHtml.querySelector(".item-weight-value");
+    console.log("ITEMWEIGHTVALUE:", itemWeightValue);
+    if (itemWeightValue)
+      itemWeightValue.innerHTML = SlotBasedEncumberanceManager.#formatSlotsShorthand(data.system.slots);
+  }
+
+  static handleLockedTidyItemSheetSlots(detailsContent: HTMLElement, data: any) {
+    const inputs = detailsContent.querySelectorAll("input.better-items-slots") as NodeListOf<HTMLInputElement>;
+    for (const input of inputs) {
+      input.disabled = !data.unlocked;
+    }
   }
 
   static #createTidyProgressBar(value: number, max: number, icon: string, tooltip: string) {
