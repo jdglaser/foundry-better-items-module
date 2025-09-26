@@ -1,0 +1,298 @@
+export class SlotBasedEncumberanceManager {
+  static cleanupMutationObserver(app: any) {
+    if (app._stowedMutationObserver) {
+      app._stowedMutationObserver.disconnect();
+      delete app._stowedMutationObserver;
+    }
+  }
+
+  static setupTidyMutationObserver(app: any, inventoryContentHtml: HTMLElement, data: any) {
+    if (app._stowedMutationObserver) return;
+
+    const observer = new MutationObserver((muts) => {
+      const addedTableNodes = muts.filter((mut) =>
+        mut.addedNodes
+          .values()
+          .toArray()
+          .some((addedNode) => addedNode instanceof HTMLElement && addedNode.matches("section.tidy-table"))
+      );
+
+      if (addedTableNodes) {
+        SlotBasedEncumberanceManager.injectTidyCharacterSheetEncumberance(app, inventoryContentHtml, data);
+      }
+    });
+
+    observer.observe(inventoryContentHtml, { childList: true, subtree: true });
+    app._stowedMutationObserver = observer;
+  }
+
+  static #toggleRemoveEquipButton(actionsHtml: HTMLElement, stowed: boolean) {
+    // Prefer toggling a disabled class rather than removing the element so layout/widths remain stable.
+    const equipBtn = actionsHtml.querySelector("[data-tooltip='DND5E.ContextMenuActionEquip']") as HTMLElement | null;
+    const unequipButton = actionsHtml.querySelector(
+      "[data-tooltip='DND5E.ContextMenuActionUnequip']"
+    ) as HTMLElement | null;
+
+    if (stowed) {
+      if (equipBtn) equipBtn.style.display = "none";
+      if (unequipButton) unequipButton.style.display = "none";
+    } else {
+      if (equipBtn) equipBtn.style.removeProperty("display");
+      if (unequipButton) unequipButton.style.removeProperty("display");
+    }
+
+    SlotBasedEncumberanceManager.#setActionsColumnWidth(actionsHtml);
+  }
+
+  static #getInventoryItems(inventoryContentHtml: HTMLElement) {
+    return (
+      (inventoryContentHtml
+        ?.querySelector("div.tidy-table-container")
+        ?.querySelectorAll("div.tidy-table-row-container[data-item-id]")
+        ?.values()
+        .toArray() as HTMLElement[]) || []
+    );
+  }
+
+  static #createStowButton(isStowed: boolean) {
+    const icon = isStowed ? "fas fa-box" : "fa-regular fa-box-open";
+    const tooltip = isStowed ? "Ready Item" : "Stow Item";
+    const btn = document.createElement("a");
+    btn.setAttribute("data-tooltip", tooltip);
+    btn.classList.add("tidy-table-button", "stow-button");
+    btn.innerHTML = `<i class="fas ${icon}"></i>`;
+    return btn;
+  }
+
+  static #insertButtonIntoActions(actions: HTMLElement, btn: HTMLElement) {
+    const buttons = actions.querySelectorAll(".tidy-table-button");
+    if (buttons.length >= 3) {
+      actions.insertBefore(btn, buttons[1]);
+    } else if (buttons.length > 0) {
+      actions.insertBefore(btn, buttons[0]);
+    } else {
+      actions.appendChild(btn);
+    }
+  }
+
+  static #setActionsColumnWidth(actionsHtml: HTMLElement) {
+    // const buttons = actionsHtml.querySelectorAll(".tidy-table-button");
+    // const displayedButtons = buttons
+    //   .values()
+    //   .toArray()
+    //   .filter((btn) => {
+    //     const style = btn.computedStyleMap().get("display");
+    //     console.log("STYLE:", style?.toString());
+    //     return style?.toString() !== "none";
+    //   });
+    const columnWidth = 1.5625 * 4;
+    actionsHtml.style.setProperty("--tidy-table-column-width", `${columnWidth}rem`);
+  }
+
+  static injectTidyCharacterSheetEncumberance(app: any, inventoryContentHtml: HTMLElement, data: any) {
+    //const inventoryPage = html.querySelector("div.inventory-content");
+    const inventoryItems = SlotBasedEncumberanceManager.#getInventoryItems(inventoryContentHtml);
+
+    for (const row of inventoryItems) {
+      const actions: HTMLElement | null = row.querySelector(".tidy-table-actions");
+      if (!actions) continue;
+
+      // Get item from itemId
+      const itemId = row.getAttribute("data-item-id");
+      const item = data.actor.collections.items.get(itemId);
+      if (!item) continue;
+
+      // Avoid duplicates
+      if (actions.querySelector(".stow-button")) continue;
+
+      const isStowed = item.getFlag("dnd5e-better-item-properties", "stowed");
+      const btn = SlotBasedEncumberanceManager.#createStowButton(isStowed);
+
+      btn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        const current = item.getFlag("dnd5e-better-item-properties", "stowed");
+
+        const newStowed = !current;
+        const inneri: any = btn.querySelector("i");
+        inneri.className = newStowed ? "fas fa-box" : "fa-regular fa-box-open";
+        btn.setAttribute("data-tooltip", newStowed ? "Ready Item" : "Stow Item");
+
+        SlotBasedEncumberanceManager.#toggleRemoveEquipButton(actions, newStowed);
+        if (newStowed && item.system.equipped) {
+          await item.update({
+            "system.equipped": false,
+          });
+        }
+
+        game.tooltip?.deactivate();
+        game.tooltip?.activate(btn);
+        await item.setFlag("dnd5e-better-item-properties", "stowed", newStowed);
+        app.render();
+      });
+
+      SlotBasedEncumberanceManager.#insertButtonIntoActions(actions, btn);
+
+      SlotBasedEncumberanceManager.#toggleRemoveEquipButton(actions, isStowed);
+
+      app.render();
+    }
+  }
+
+  static replaceTidyItemSheetSlots(app: any, detailsContent: HTMLElement, data: any) {
+    console.log("APP:", app);
+    console.log("DATA:", data);
+    const weightGroup = detailsContent.querySelector(".form-group label[for$='-weight-value']")?.closest(".form-group");
+    console.log(weightGroup);
+    const label = weightGroup?.querySelector("label") as HTMLElement;
+    label.innerHTML = "Slots";
+    const formFields = weightGroup?.querySelector("div.form-fields");
+
+    // Slots
+    const slotsInputContainer = document.createElement("div");
+    slotsInputContainer.classList.add("form-group", "label-top");
+    const slotsLabel = document.createElement("label");
+    slotsLabel.innerHTML = "Slots";
+
+    const slotsInput = document.createElement("input");
+    slotsInput.classList.add("better-items-slots");
+    slotsInput.type = "number";
+    slotsInput.min = "0";
+    slotsInput.value = data.system.slots.value;
+
+    slotsInput.addEventListener("focusout", async (ev) => {
+      const value = (ev.target as HTMLInputElement).value ?? slotsInput.value;
+      await data.system.parent.setFlag("dnd5e-better-item-properties", "slots", parseInt(value));
+    });
+
+    slotsInputContainer.replaceChildren(slotsLabel, slotsInput);
+
+    //if (!data.unlocked) slotsInput.disabled = true;
+    slotsInput.setAttribute("data-tidy-field", "flags.dnd5e-better-item-properties.slots");
+
+    // Stack
+    const stackInputContainer = document.createElement("div");
+    stackInputContainer.classList.add("form-group", "label-top");
+    const stackLabel = document.createElement("label");
+    stackLabel.innerHTML = "Stack";
+
+    const stackInput = document.createElement("input");
+    stackInput.type = "number";
+    stackInput.min = "0";
+    stackInput.value = data.system.slots.stack;
+
+    stackInput.addEventListener("focusout", async (ev) => {
+      const value = (ev.target as HTMLInputElement).value ?? 1;
+      await data.system.parent.setFlag("dnd5e-better-item-properties", "stack", parseInt(value));
+    });
+
+    stackInputContainer.replaceChildren(stackLabel, stackInput);
+
+    //if (!data.unlocked) stackInput.disabled = true;
+
+    // Tiny
+    const tinyInputContainer = document.createElement("div");
+    tinyInputContainer.classList.add("form-group", "label-top");
+    tinyInputContainer.style.alignSelf = "flex-start";
+    const tinyLabel = document.createElement("label");
+    tinyLabel.innerHTML = "Tiny";
+
+    const tinyInput = document.createElement("input");
+    tinyInput.type = "checkbox";
+    tinyInput.checked = data.system.slots.tiny;
+
+    tinyInput.addEventListener("change", async (ev) => {
+      const checked = (ev.target as HTMLInputElement).checked;
+      console.log("DATA:", data);
+      await data.system.parent.setFlag("dnd5e-better-item-properties", "tiny", checked);
+    });
+
+    tinyInputContainer.replaceChildren(tinyLabel, tinyInput);
+
+    //if (!data.unlocked) tinyInput.disabled = true;
+
+    formFields?.replaceChildren(slotsInputContainer, stackInputContainer, tinyInputContainer);
+  }
+
+  static #createTidyProgressBar(value: number, max: number, icon: string, tooltip: string) {
+    return `
+      <div role="meter" 
+        aria-valuemin="0" 
+        data-tooltip-direction="UP" 
+        data-tooltip="${tooltip}"
+        class="meter progress encumbrance theme-dark medium" 
+        aria-valuenow="${(value / max) * 100}" 
+        aria-valuetext="${value}" 
+        aria-valuemax="${max}" 
+        style="--bar-percentage: ${Math.round((value / max) * 100)}%; 
+        --encumbrance-low: 33.333333333333336%; 
+        --encumbrance-high: 66.66666666666667%;">
+          <div class="label">
+            <i class="${icon} text-label-icon"></i>
+             <span class="value font-weight-label">${value}</span> 
+             <span class="separator">/</span> 
+             <span class="max color-text-default">${max}</span>
+          </div> 
+          <i class="breakpoint encumbrance-low arrow-up" role="presentation"></i> 
+          <i class="breakpoint encumbrance-low arrow-down" role="presentation"></i> 
+          <i class="breakpoint encumbrance-high arrow-up" role="presentation"></i> 
+          <i class="breakpoint encumbrance-high arrow-down" role="presentation"></i>
+        </div>
+    `;
+  }
+
+  static replaceTidyEncumberanceDetails(inventoryContentHtml: HTMLElement, data: any) {
+    const encumbranceDetails = inventoryContentHtml.querySelector("div.encumbrance-details");
+    if (!encumbranceDetails) return;
+
+    const { value: readiedItems, max: maxReadiedItems } = data.system.slotBasedEncumberance.readied;
+    const { value: stowedItems, max: maxStowedItems } = data.system.slotBasedEncumberance.stowed;
+
+    encumbranceDetails.innerHTML = `
+      <div class="pill flexshrink"><span class="text-normal">Strength</span> <span>${
+        data.system.abilities.str.value
+      }</span></div>
+      ${SlotBasedEncumberanceManager.#createTidyProgressBar(
+        readiedItems,
+        maxReadiedItems,
+        "fa-regular fa-box-open",
+        "Readied Items"
+      )}
+      ${SlotBasedEncumberanceManager.#createTidyProgressBar(stowedItems, maxStowedItems, "fas fa-box", "Stowed Items")}
+    `;
+  }
+
+  static async addCharacterSlotBasedEnumberance(characterData: any) {
+    const allItems = [
+      ...characterData.parent.itemTypes.equipment,
+      ...characterData.parent.itemTypes.consumable,
+      ...characterData.parent.itemTypes.loot,
+      ...characterData.parent.itemTypes.weapon,
+    ];
+
+    const stowedItems = allItems.filter((item) => item.getFlag("dnd5e-better-item-properties", "stowed"));
+    const readiedItems = allItems.filter((item) => !item.getFlag("dnd5e-better-item-properties", "stowed"));
+
+    characterData.slotBasedEncumberance = {
+      stowed: {
+        value: stowedItems.map((item) => item.system.slots.value).reduce((acc, cur) => acc + cur, 0),
+        max: characterData.abilities.str.value,
+      },
+      readied: {
+        value: readiedItems.map((item) => item.system.slots.value).reduce((acc, cur) => acc + cur, 0),
+        max: Math.floor(characterData.abilities.str.value / 2),
+      },
+    };
+  }
+
+  static addItemSlots(itemData: any) {
+    const valueOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "slots");
+    const stackOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "stack");
+    const tinyOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "tiny");
+
+    itemData.slots = {
+      value: valueOverride ?? 1,
+      stack: stackOverride ?? 1,
+      tiny: tinyOverride ?? false,
+    };
+  }
+}

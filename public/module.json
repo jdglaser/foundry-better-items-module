@@ -1,0 +1,35 @@
+{
+  "id": "dnd5e-better-item-properties",
+  "title": "D&D5e Better Item Properties",
+  "description": "Enhance property pills with tooltips.",
+  "version": "1.0.0",
+  "compatibility": { "minimum": "13", "verified": "13" },
+  "authors": [{ "name": "Jarred Glaser" }],
+  "esmodules": ["module.js"],
+  "packs": [
+    {
+      "name": "rules-reference",
+      "label": "Rules Reference",
+      "path": "packs/rules-reference.db",
+      "type": "JournalEntry",
+      "system": "dnd5e"
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "D&D 5e Better Item Properties",
+      "color": "#007BAC",
+      "sorting": "m",
+      "packs": ["rules-reference"]
+    }
+  ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-wrapper",
+        "type": "module"
+      }
+    ]
+  },
+  "styles": ["styles.css"]
+}

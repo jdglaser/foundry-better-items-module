@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "types": ["fvtt-types"],
+    "moduleResolution": "bundler",
+    "target": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitThis": false
+  },
+  "include": ["src"]
+}

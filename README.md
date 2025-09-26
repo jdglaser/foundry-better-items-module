@@ -1,0 +1,1 @@
+game.settings.set("core", "compendiumConfiguration", {});
