@@ -102,6 +102,11 @@ export class SlotBasedEncumberanceManager {
       const item = data.actor.collections.items.get(itemId);
       if (!item) continue;
 
+      if (item.system.slots && item.system.slots.tiny) {
+        SlotBasedEncumberanceManager.#setActionsColumnWidth(actions);
+        continue;
+      }
+
       // Avoid duplicates
       if (actions.querySelector(".stow-button")) continue;
 
@@ -188,11 +193,11 @@ export class SlotBasedEncumberanceManager {
     const stackInput = document.createElement("input");
     stackInput.classList.add("better-items-slots");
     stackInput.type = "number";
-    stackInput.min = "0";
+    stackInput.min = "1";
     stackInput.value = data.system.slots.stack;
 
     stackInput.addEventListener("focusout", async (ev) => {
-      const value = (ev.target as HTMLInputElement).value ?? 1;
+      const value = (ev.target as HTMLInputElement).value ?? stackInput.value;
       await data.system.parent.setFlag("dnd5e-better-item-properties", "stack", parseInt(value));
     });
 
@@ -293,13 +298,38 @@ export class SlotBasedEncumberanceManager {
     const stowedItems = allItems.filter((item) => item.getFlag("dnd5e-better-item-properties", "stowed"));
     const readiedItems = allItems.filter((item) => !item.getFlag("dnd5e-better-item-properties", "stowed"));
 
+    let currentStowedCapacity = 0;
+    const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = characterData.currency;
+    let tinyItems = cp + sp + ep + gp + pp;
+    for (const item of stowedItems) {
+      if (item.system.slots.stack > 1) {
+        currentStowedCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
+      } else if (item.system.slots.tiny) {
+        tinyItems += item.system.quantity;
+      } else {
+        currentStowedCapacity += item.system.quantity * item.system.slots.value;
+      }
+    }
+
+    currentStowedCapacity += Math.ceil(tinyItems / 100);
+
+    let currentReadiedCapacity = 0;
+    for (const item of readiedItems) {
+      if (item.system.slots.stack > 1) {
+        currentReadiedCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
+      } else {
+        currentReadiedCapacity += item.system.quantity * item.system.slots.value;
+      }
+    }
+    console.log(characterData);
+
     characterData.slotBasedEncumberance = {
       stowed: {
-        value: stowedItems.map((item) => item.system.slots.value).reduce((acc, cur) => acc + cur, 0),
+        value: currentStowedCapacity,
         max: characterData.abilities.str.value,
       },
       readied: {
-        value: readiedItems.map((item) => item.system.slots.value).reduce((acc, cur) => acc + cur, 0),
+        value: currentReadiedCapacity,
         max: Math.floor(characterData.abilities.str.value / 2),
       },
     };
