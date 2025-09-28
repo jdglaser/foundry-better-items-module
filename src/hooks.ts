@@ -1,5 +1,9 @@
 import { RANGE_REGEX } from "./constants";
+import { CharacterData } from "./data/characterData";
+import { ItemData } from "./data/itemData";
 import { SlotBasedEncumberanceManager } from "./slotBasedEncumberance";
+import { TidyCharacterSheet } from "./ui/tidyCharacterSheet";
+import { TidyItemSheet } from "./ui/tidyItemSheet";
 import { getDocumentReferenceHtml, steppedDenomination, titleCase } from "./utils";
 
 Hooks.once("init", () => {
@@ -25,8 +29,8 @@ Hooks.once("init", () => {
       "dnd5e-better-item-properties",
       `dnd5e.dataModels.item.${itemDataClass}.prototype.prepareDerivedData`,
       function (wrapped: any, ...args: any) {
-        SlotBasedEncumberanceManager.addItemSlots(this);
         let result = wrapped(...args);
+        ItemData.prepareDerivedData(this);
         return result;
       }
     );
@@ -36,9 +40,11 @@ Hooks.once("init", () => {
     "dnd5e-better-item-properties",
     "dnd5e.dataModels.actor.CharacterData.prototype.prepareDerivedData",
     function (wrapped: any, ...args: any) {
-      // ... do things ...
       let result = wrapped(...args);
 
+      CharacterData.prepareDerivedData(this);
+
+      // TODO: Move to data class
       const ac = this.attributes.ac;
 
       const { armors, shields } = this.parent.itemTypes.equipment.reduce(
@@ -70,8 +76,6 @@ Hooks.once("init", () => {
         this.attributes.movement.walk -= 10;
       }
 
-      SlotBasedEncumberanceManager.addCharacterSlotBasedEnumberance(this);
-
       // ... do things ...
       return result;
     },
@@ -80,23 +84,15 @@ Hooks.once("init", () => {
 });
 
 Hooks.on("renderTidy5eContainerSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
-  const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
-
-  SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(detailsContent, data);
-  SlotBasedEncumberanceManager.handleLockedTidyItemSheetSlots(detailsContent, data);
-  SlotBasedEncumberanceManager.replaceItemWeightValue(html, data);
+  // TODO
 });
 
 Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
-  const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
-  console.log(detailsContent);
+  TidyItemSheet.render(html, data);
 
-  SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(detailsContent, data);
-  SlotBasedEncumberanceManager.handleLockedTidyItemSheetSlots(detailsContent, data);
-  SlotBasedEncumberanceManager.replaceItemWeightValue(html, data);
-  const type = data.data.type;
-
+  // TODO: Move to class
   // Only weapons and armor/equipment
+  const type = data.data.type;
   if (!["weapon", "equipment"].includes(type)) return;
 
   const systemData = data.data.system;
@@ -170,27 +166,6 @@ Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElem
   }
 });
 
-Hooks.on("renderTidy5eCharacterSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any, ...args: any) => {
-  const inventoryContentHtml = html.querySelector("div.inventory-content") as HTMLElement;
-  if (!inventoryContentHtml) return;
-
-  //SlotBasedEncumberanceManager.injectTidyCharacterSheetEncumberance(app, inventoryContentHtml, data);
-  //SlotBasedEncumberanceManager.setupTidyMutationObserver(app, inventoryContentHtml, data);
-  SlotBasedEncumberanceManager.replaceTidyEncumberanceDetails(inventoryContentHtml, data);
-});
-
-Hooks.on("tidy5e-sheet.sheetModeConfiguring" as any, (app: any, html: HTMLElement, { unlocked }: any) => {
-  /*console.log("UNLOCKED:", unlocked);
-  console.log("APP:", app);
-  console.log("HTML:", html);
-  if (!html) return;
-  const inputs = html.querySelectorAll("input.better-items-slots");
-  console.log("INPUTS:", inputs);
-  for (const input of inputs) {
-    input.disabled = !unlocked;
-  }*/
-});
-
-Hooks.on("closeTidy5eCharacterSheetQuadrone" as any, async (app: any) => {
-  SlotBasedEncumberanceManager.cleanupMutationObserver(app);
+Hooks.on("renderTidy5eCharacterSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
+  TidyCharacterSheet.render(html, data);
 });
