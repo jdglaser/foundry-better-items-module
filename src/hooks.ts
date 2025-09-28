@@ -13,7 +13,14 @@ Hooks.once("init", () => {
     default: true,
   });
 
-  for (const itemDataClass of ["LootData", "WeaponData", "EquipmentData", "ToolData", "ConsumableData"]) {
+  for (const itemDataClass of [
+    "LootData",
+    "WeaponData",
+    "EquipmentData",
+    "ToolData",
+    "ConsumableData",
+    "ContainerData",
+  ]) {
     libWrapper.register(
       "dnd5e-better-item-properties",
       `dnd5e.dataModels.item.${itemDataClass}.prototype.prepareDerivedData`,
@@ -72,8 +79,17 @@ Hooks.once("init", () => {
   );
 });
 
+Hooks.on("renderTidy5eContainerSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
+  const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
+
+  SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(detailsContent, data);
+  SlotBasedEncumberanceManager.handleLockedTidyItemSheetSlots(detailsContent, data);
+  SlotBasedEncumberanceManager.replaceItemWeightValue(html, data);
+});
+
 Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
   const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
+  console.log(detailsContent);
 
   SlotBasedEncumberanceManager.replaceTidyItemSheetSlots(detailsContent, data);
   SlotBasedEncumberanceManager.handleLockedTidyItemSheetSlots(detailsContent, data);
@@ -145,11 +161,11 @@ Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElem
   });
 
   const mastery = systemData.mastery;
-  if (mastery) {
+  if (mastery && !html.querySelector("li.mastery")) {
     const enrichedhtml = await getDocumentReferenceHtml(mastery, titleCase(mastery));
     pillList.insertAdjacentHTML(
       "beforeend",
-      `<li class="pill centered"><span class="text-normal">Mastery</span> ${enrichedhtml.outerHTML}</li>`
+      `<li class="pill centered mastery"><span class="text-normal">Mastery</span> ${enrichedhtml.outerHTML}</li>`
     );
   }
 });
@@ -158,8 +174,8 @@ Hooks.on("renderTidy5eCharacterSheetQuadrone" as any, async (app: any, html: HTM
   const inventoryContentHtml = html.querySelector("div.inventory-content") as HTMLElement;
   if (!inventoryContentHtml) return;
 
-  SlotBasedEncumberanceManager.injectTidyCharacterSheetEncumberance(app, inventoryContentHtml, data);
-  SlotBasedEncumberanceManager.setupTidyMutationObserver(app, inventoryContentHtml, data);
+  //SlotBasedEncumberanceManager.injectTidyCharacterSheetEncumberance(app, inventoryContentHtml, data);
+  //SlotBasedEncumberanceManager.setupTidyMutationObserver(app, inventoryContentHtml, data);
   SlotBasedEncumberanceManager.replaceTidyEncumberanceDetails(inventoryContentHtml, data);
 });
 

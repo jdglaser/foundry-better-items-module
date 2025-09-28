@@ -82,7 +82,6 @@ export class SlotBasedEncumberanceManager {
     //   .toArray()
     //   .filter((btn) => {
     //     const style = btn.computedStyleMap().get("display");
-    //     console.log("STYLE:", style?.toString());
     //     return style?.toString() !== "none";
     //   });
     const columnWidth = 1.5625 * 4;
@@ -143,13 +142,24 @@ export class SlotBasedEncumberanceManager {
     }
   }
 
-  static #formatSlotsShorthand({ value, stack, tiny }: { value: number; stack: number; tiny: boolean }) {
+  static #formatSlotsShorthand({
+    value,
+    stack,
+    tiny,
+    ifEquipped,
+  }: {
+    value: number;
+    stack: number;
+    tiny: boolean;
+    ifEquipped: number;
+  }) {
     if (tiny) {
       return "Tiny";
     }
 
     const stackText = stack === 1 ? "" : ` (Stack: x${stack})`;
-    return `${value}${stackText}`;
+    const ifEquippedText = value === ifEquipped ? "" : ` (${ifEquipped} if equipped)`;
+    return `${value}${ifEquippedText}${stackText}`;
   }
 
   static replaceTidyItemSheetSlots(detailsContent: HTMLElement, data: any) {
@@ -158,10 +168,12 @@ export class SlotBasedEncumberanceManager {
     }
 
     const weightGroup = detailsContent.querySelector(".form-group label[for$='-weight-value']")?.closest(".form-group");
-    weightGroup?.classList.add("better-items-slots-group");
-    const label = weightGroup?.querySelector("label") as HTMLElement;
-    label.innerHTML = "Slots";
-    const formFields = weightGroup?.querySelector("div.form-fields");
+    if (!weightGroup) return;
+
+    weightGroup.classList.add("better-items-slots-group");
+    const label = weightGroup.querySelector("label");
+    if (label) label.innerHTML = "Slots";
+    const formFields = weightGroup.querySelector("div.form-fields");
 
     // Slots
     const slotsInputContainer = document.createElement("div");
@@ -227,7 +239,7 @@ export class SlotBasedEncumberanceManager {
 
   static replaceItemWeightValue(headerHtml: HTMLElement, data: any) {
     const itemWeightValue = headerHtml.querySelector(".item-weight-value");
-    console.log("ITEMWEIGHTVALUE:", itemWeightValue);
+    console.log("ITEM WEIGHT VALUE:", itemWeightValue);
     if (itemWeightValue)
       itemWeightValue.innerHTML = SlotBasedEncumberanceManager.#formatSlotsShorthand(data.system.slots);
   }
@@ -270,21 +282,36 @@ export class SlotBasedEncumberanceManager {
     const encumbranceDetails = inventoryContentHtml.querySelector("div.encumbrance-details");
     if (!encumbranceDetails) return;
 
-    const { value: readiedItems, max: maxReadiedItems } = data.system.slotBasedEncumberance.readied;
+    //const { value: readiedItems, max: maxReadiedItems } = data.system.slotBasedEncumberance.readied;
     const { value: stowedItems, max: maxStowedItems } = data.system.slotBasedEncumberance.stowed;
 
     encumbranceDetails.innerHTML = `
       <div class="pill flexshrink"><span class="text-normal">Strength</span> <span>${
         data.system.abilities.str.value
       }</span></div>
-      ${SlotBasedEncumberanceManager.#createTidyProgressBar(
+      ${
+        /*SlotBasedEncumberanceManager.#createTidyProgressBar(
         readiedItems,
         maxReadiedItems,
         "fa-regular fa-box-open",
         "Readied Items"
+      )*/ ""
+      }
+      ${SlotBasedEncumberanceManager.#createTidyProgressBar(
+        stowedItems,
+        maxStowedItems,
+        "fas fa-weight-hanging",
+        "Item Slots"
       )}
-      ${SlotBasedEncumberanceManager.#createTidyProgressBar(stowedItems, maxStowedItems, "fas fa-box", "Stowed Items")}
     `;
+
+    const capacityBars = inventoryContentHtml.querySelectorAll(
+      'div[data-tidy-column-key="capacityBar"]'
+    ) as NodeListOf<HTMLElement>;
+    console.log("CAPACITY BAR:", capacityBars);
+    for (const bar of capacityBars) {
+      bar.style.display = "none";
+    }
   }
 
   static async addCharacterSlotBasedEnumberance(characterData: any) {
@@ -293,57 +320,135 @@ export class SlotBasedEncumberanceManager {
       ...characterData.parent.itemTypes.consumable,
       ...characterData.parent.itemTypes.loot,
       ...characterData.parent.itemTypes.weapon,
+      ...characterData.parent.itemTypes.container,
     ];
 
-    const stowedItems = allItems.filter((item) => item.getFlag("dnd5e-better-item-properties", "stowed"));
-    const readiedItems = allItems.filter((item) => !item.getFlag("dnd5e-better-item-properties", "stowed"));
+    //const stowedItems = allItems.filter((item) => item.getFlag("dnd5e-better-item-properties", "stowed"));
+    //const readiedItems = allItems.filter((item) => !item.getFlag("dnd5e-better-item-properties", "stowed"));
 
     let currentStowedCapacity = 0;
     const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = characterData.currency;
     let tinyItems = cp + sp + ep + gp + pp;
-    for (const item of stowedItems) {
+    for (const item of allItems) {
       if (item.system.slots.stack > 1) {
         currentStowedCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
       } else if (item.system.slots.tiny) {
         tinyItems += item.system.quantity;
       } else {
-        currentStowedCapacity += item.system.quantity * item.system.slots.value;
+        if (item.system.slots.ifEquipped !== item.system.slots.value && item.system.equipped) {
+          currentStowedCapacity += item.system.quantity * item.system.slots.ifEquipped;
+        } else {
+          currentStowedCapacity += item.system.quantity * item.system.slots.value;
+        }
       }
     }
 
     currentStowedCapacity += Math.ceil(tinyItems / 100);
 
-    let currentReadiedCapacity = 0;
-    for (const item of readiedItems) {
-      if (item.system.slots.stack > 1) {
-        currentReadiedCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
-      } else {
-        currentReadiedCapacity += item.system.quantity * item.system.slots.value;
-      }
-    }
-    console.log(characterData);
+    // let currentReadiedCapacity = 0;
+    // for (const item of readiedItems) {
+    //   if (item.system.slots.stack > 1) {
+    //     currentReadiedCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
+    //   } else {
+    //     currentReadiedCapacity += item.system.quantity * item.system.slots.value;
+    //   }
+    // }
 
     characterData.slotBasedEncumberance = {
       stowed: {
         value: currentStowedCapacity,
-        max: characterData.abilities.str.value,
+        max: characterData.abilities.str.value + 10,
       },
-      readied: {
-        value: currentReadiedCapacity,
-        max: Math.floor(characterData.abilities.str.value / 2),
-      },
+      // readied: {
+      //   value: currentReadiedCapacity,
+      //   max: Math.floor(characterData.abilities.str.value / 2),
+      // },
     };
   }
+
+  static #resolveSlots(itemData: any, parentData: any, systemData: any) {
+    let stack = 1;
+    let value = 1;
+    let tiny = false;
+    let ifEquipped = value;
+    if (itemData.type && itemData.type.value === "ammo") {
+      switch (itemData.identifier) {
+        case "arrows":
+          stack = 20;
+          break;
+        case "bullets-firearm":
+          stack = 10;
+          break;
+        case "bullets-sling":
+          stack = 20;
+          break;
+        case "needles":
+          stack = 50;
+          break;
+        case "bolts":
+          stack = 20;
+          break;
+      }
+    }
+
+    if (parentData.type === "equipment" && itemData.type) {
+      switch (itemData.type.value) {
+        case "heavy":
+          value = 2;
+          break;
+        case "medium":
+          value = 2;
+          break;
+        case "light":
+          value = 1;
+          break;
+      }
+    }
+
+    if (parentData.type === "weapon") {
+      if (["hvy", "two"].some((prop) => itemData.properties.has(prop))) value = 2;
+    }
+
+    // 0 if equipped
+    if (["clothes-fine", "clothes-travelers", "fine-clothes"].includes(itemData.identifier)) ifEquipped = 0;
+
+    if (["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(itemData.identifier)) value = 0;
+
+    if (itemData.type && ["gem", "ring"].includes(itemData.type.value)) tiny = true;
+
+    return {
+      value,
+      stack,
+      tiny,
+      ifEquipped,
+    };
+  }
+
+  static #getContainerSlots() {}
 
   static addItemSlots(itemData: any) {
     const valueOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "slots");
     const stackOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "stack");
     const tinyOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "tiny");
+    const ifEquippedOverride = itemData.parent.getFlag("dnd5e-better-item-properties", "ifEquipped");
+
+    console.log("ITEM DATA:", itemData);
+    if (itemData.parent.type === "container") {
+      console.log("CONTENTS:", itemData.contents);
+      console.log("");
+    }
+
+    // types {'weapon', 'equipment', 'consumable', 'loot', 'tool'}
+    const parent = itemData.parent;
+    const systemData = parent.system;
+
+    const { value, stack, tiny, ifEquipped } = SlotBasedEncumberanceManager.#resolveSlots(itemData, parent, systemData);
 
     itemData.slots = {
-      value: valueOverride ?? 1,
-      stack: stackOverride ?? 1,
-      tiny: tinyOverride ?? false,
+      value: valueOverride ?? value,
+      stack: stackOverride ?? stack,
+      tiny: tinyOverride ?? tiny,
+      ifEquipped: ifEquippedOverride ?? ifEquipped,
     };
   }
 }
