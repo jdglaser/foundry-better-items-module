@@ -1,10 +1,18 @@
 import { ItemSlots } from "../types";
 
 export class ItemData {
+  /**
+   * Prepare derived ItemData
+   */
   static async prepareDerivedData(data: any) {
     this.#resolveItemSlots(data);
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * Resolve item slots for item
+   */
   static #resolveItemSlots(data: any) {
     const valueOverride = data.parent.getFlag("dnd5e-better-item-properties", "slots");
     const stackOverride = data.parent.getFlag("dnd5e-better-item-properties", "stack");
@@ -25,6 +33,11 @@ export class ItemData {
     };
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * Resolve default item slots for item
+   */
   static #resolveDefaultItemSlots(itemData: any, parentData: any, systemData: any): ItemSlots {
     let stack = 1;
     let value = 1;
