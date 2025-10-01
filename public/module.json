@@ -1,7 +1,7 @@
 {
   "id": "dnd5e-better-item-properties",
   "title": "D&D5e Better Item Properties",
-  "description": "Enhance property pills with tooltips.",
+  "description": "Enhance item information and slot based encumberance system.",
   "version": "1.0.0",
   "compatibility": { "minimum": "13", "verified": "13" },
   "authors": [{ "name": "Jarred Glaser" }],

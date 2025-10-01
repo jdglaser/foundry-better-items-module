@@ -9,6 +9,7 @@ export class Shared {
     slotsInput.classList.add("better-items-slots");
     slotsInput.type = "number";
     slotsInput.min = "0";
+    console.log("DATA IN SLOTS:", data);
     slotsInput.value = data.system.slots.value;
 
     slotsInput.addEventListener("focusout", async (ev) => {
@@ -61,7 +62,7 @@ export class Shared {
     if (itemWeightValue) itemWeightValue.innerHTML = value;
   }
 
-  static toggleLockedTidyItemSheetSlots(html: HTMLElement, data: any) {
+  static toggleSlotsDetailsLock(html: HTMLElement, data: any) {
     const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement | null;
     if (!detailsContent) return;
 

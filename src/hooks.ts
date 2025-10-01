@@ -1,14 +1,15 @@
-import { RANGE_REGEX } from "./constants";
+import { MODULE_ID, RANGE_REGEX } from "./constants";
 import { CharacterData } from "./data/characterData";
+import { ContainerData } from "./data/containerData";
 import { ItemData } from "./data/itemData";
-import { SlotBasedEncumberanceManager } from "./slotBasedEncumberance";
 import { TidyCharacterSheet } from "./ui/tidyCharacterSheet";
+import { TidyContainerSheet } from "./ui/tidyContainerSheet";
 import { TidyItemSheet } from "./ui/tidyItemSheet";
 import { getDocumentReferenceHtml, steppedDenomination, titleCase } from "./utils";
 
 Hooks.once("init", () => {
   if (!game || !game.settings) return;
-  game.settings.register("dnd5e-better-item-properties" as any, "enableTooltips" as any, {
+  game.settings.register(MODULE_ID as any, "enableTooltips" as any, {
     name: "Enable Property Tooltips",
     hint: "If enabled, item property pills will be replaced with rule reference tooltips.",
     scope: "client",
@@ -17,27 +18,45 @@ Hooks.once("init", () => {
     default: true,
   });
 
-  for (const itemDataClass of [
-    "LootData",
-    "WeaponData",
-    "EquipmentData",
-    "ToolData",
-    "ConsumableData",
-    "ContainerData",
-  ]) {
+  for (const itemDataClass of ["LootData", "WeaponData", "EquipmentData", "ToolData", "ConsumableData"]) {
     libWrapper.register(
-      "dnd5e-better-item-properties",
+      MODULE_ID,
       `dnd5e.dataModels.item.${itemDataClass}.prototype.prepareDerivedData`,
       function (wrapped: any, ...args: any) {
         let result = wrapped(...args);
         ItemData.prepareDerivedData(this);
         return result;
-      }
+      },
+      "MIXED"
     );
   }
 
+  /*libWrapper.register(
+    MODULE_ID,
+    "dnd5e.dataModels.item.ContainerData.prototype.prepareBaseData",
+    function (wrapped: any, ...args: any) {
+      console.log("IN PREP BASE DATA");
+      let result = wrapped(...args);
+      ContainerData.prepareBaseData(this);
+      return result;
+    },
+    "MIXED"
+  );*/
+
   libWrapper.register(
-    "dnd5e-better-item-properties",
+    MODULE_ID,
+    "dnd5e.dataModels.item.ContainerData.prototype.prepareDerivedData",
+    function (wrapped: any, ...args: any) {
+      console.log("IN PREP DATA");
+      let result = wrapped(...args);
+      ContainerData.prepareDerivedData(this);
+      return result;
+    },
+    "MIXED"
+  );
+
+  libWrapper.register(
+    MODULE_ID,
     "dnd5e.dataModels.actor.CharacterData.prototype.prepareDerivedData",
     function (wrapped: any, ...args: any) {
       let result = wrapped(...args);
@@ -84,7 +103,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.on("renderTidy5eContainerSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {
-  // TODO
+  TidyContainerSheet.render(html, data);
 });
 
 Hooks.on("renderTidy5eItemSheetQuadrone" as any, async (app: any, html: HTMLElement, data: any) => {

@@ -6,9 +6,9 @@ export class TidyItemSheet {
    * Render the TidyItemSheet changes
    */
   static render(html: HTMLElement, data: any) {
-    this.#injectTidyItemSheetSlots(html, data);
+    this.#injectSlotsDetails(html, data);
     Shared.injectWeightValue(html, this.#formatSlotsShorthand(data.system.slots));
-    Shared.toggleLockedTidyItemSheetSlots(html, data);
+    Shared.toggleSlotsDetailsLock(html, data);
   }
 
   /* -------------------------------------------- */
@@ -31,7 +31,7 @@ export class TidyItemSheet {
   /**
    * Inject HTML for handling slot configuration for an item
    */
-  static #injectTidyItemSheetSlots(html: HTMLElement, data: any) {
+  static #injectSlotsDetails(html: HTMLElement, data: any) {
     // Get details tab of item sheet
     const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
 

@@ -24,16 +24,10 @@ export class CharacterData {
     const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
     let tinyItems = cp + sp + ep + gp + pp;
     for (const item of allItems) {
-      if (item.system.slots.stack > 1) {
-        currentCapacity += Math.ceil(item.system.quantity / item.system.slots.stack) * item.system.slots.value;
-      } else if (item.system.slots.tiny) {
+      if (item.system.slots.tiny) {
         tinyItems += item.system.quantity;
       } else {
-        if (item.system.slots.ifEquipped !== item.system.slots.value && item.system.equipped) {
-          currentCapacity += item.system.quantity * item.system.slots.ifEquipped;
-        } else {
-          currentCapacity += item.system.quantity * item.system.slots.value;
-        }
+        currentCapacity += item.system.slots.resolvedValue;
       }
     }
 

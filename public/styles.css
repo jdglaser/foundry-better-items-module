@@ -1,7 +1,0 @@
-.tidy5e-sheet:is(.quadrone) .tidy-table-actions .tidy-table-button.bitm-disabled-button i {
-  opacity: 50%;
-}
-
-.tidy5e-sheet:is(.quadrone) .tidy-table-actions .tidy-table-button.bitm-disabled-button:hover i {
-  background: transparent;
-}

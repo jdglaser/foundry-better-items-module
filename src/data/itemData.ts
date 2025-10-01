@@ -4,7 +4,7 @@ export class ItemData {
   /**
    * Prepare derived ItemData
    */
-  static async prepareDerivedData(data: any) {
+  static prepareDerivedData(data: any) {
     this.#resolveItemSlots(data);
   }
 
@@ -23,13 +23,33 @@ export class ItemData {
     const parent = data.parent;
     const systemData = parent.system;
 
-    const { value, stack, tiny, ifEquipped } = this.#resolveDefaultItemSlots(data, parent, systemData);
+    const {
+      value: defaultValue,
+      stack: defaultStack,
+      tiny: defaultTiny,
+      ifEquipped: defaultIfEquipped,
+    } = this.#resolveDefaultItemSlots(data, parent, systemData);
+
+    const value = valueOverride ?? defaultValue;
+    const stack = stackOverride ?? defaultStack;
+    const tiny = tinyOverride ?? defaultTiny;
+    const ifEquipped = ifEquippedOverride ?? defaultIfEquipped;
+
+    let resolvedValue = data.quantity * value;
+    if (stack > 1) {
+      resolvedValue = Math.ceil(data.quantity / stack) * value;
+    }
+
+    if (ifEquipped !== null) {
+      resolvedValue = data.quantity * ifEquipped;
+    }
 
     data.slots = {
-      value: valueOverride ?? value,
-      stack: stackOverride ?? stack,
-      tiny: tinyOverride ?? tiny,
-      ifEquipped: ifEquippedOverride ?? ifEquipped,
+      value,
+      resolvedValue,
+      stack,
+      tiny,
+      ifEquipped,
     };
   }
 
@@ -38,7 +58,7 @@ export class ItemData {
   /**
    * Resolve default item slots for item
    */
-  static #resolveDefaultItemSlots(itemData: any, parentData: any, systemData: any): ItemSlots {
+  static #resolveDefaultItemSlots(itemData: any, parentData: any, systemData: any) {
     let stack = 1;
     let value = 1;
     let tiny = false;

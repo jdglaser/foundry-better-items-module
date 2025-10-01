@@ -41,16 +41,17 @@ export class TidyCharacterSheet {
    * Get HTML string to render tidy progress bar
    */
   static #getTidyProgressBarHTMLString(value: number, max: number, icon: string, tooltip: string) {
+    const percentage = Math.round((value / max) * 100);
     return `
       <div role="meter" 
         aria-valuemin="0" 
         data-tooltip-direction="UP" 
         data-tooltip="${tooltip}"
-        class="meter progress encumbrance theme-dark medium" 
+        class="meter progress encumbrance theme-dark medium${percentage >= 100 ? "high" : ""}" 
         aria-valuenow="${(value / max) * 100}" 
         aria-valuetext="${value}" 
         aria-valuemax="${max}" 
-        style="--bar-percentage: ${Math.round((value / max) * 100)}%; 
+        style="--bar-percentage: ${percentage}%; 
         --encumbrance-low: 33.333333333333336%; 
         --encumbrance-high: 66.66666666666667%;">
           <div class="label">

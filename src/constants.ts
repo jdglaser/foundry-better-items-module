@@ -1,3 +1,5 @@
+export const MODULE_ID = "dnd5e-better-item-properties";
+
 export const BASE_COMPENDIUM_PATH =
   "Compendium.dnd5e-better-item-properties.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage";
 
