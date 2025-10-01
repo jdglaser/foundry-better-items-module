@@ -9,6 +9,19 @@ import { getDocumentReferenceHtml, steppedDenomination, titleCase } from "./util
 
 Hooks.once("init", () => {
   if (!game || !game.settings) return;
+
+  // @ts-ignore
+  const DndContainerData = dnd5e.dataModels.item.ContainerData;
+
+  if (!Object.prototype.hasOwnProperty.call(DndContainerData.prototype, "slotCapacity")) {
+    Object.defineProperty(DndContainerData.prototype, "slotCapacity", {
+      get: function () {
+        return ContainerData.getContainerCapacity(this);
+      },
+      configurable: true,
+    });
+  }
+
   game.settings.register(MODULE_ID as any, "enableTooltips" as any, {
     name: "Enable Property Tooltips",
     hint: "If enabled, item property pills will be replaced with rule reference tooltips.",
@@ -31,23 +44,10 @@ Hooks.once("init", () => {
     );
   }
 
-  /*libWrapper.register(
-    MODULE_ID,
-    "dnd5e.dataModels.item.ContainerData.prototype.prepareBaseData",
-    function (wrapped: any, ...args: any) {
-      console.log("IN PREP BASE DATA");
-      let result = wrapped(...args);
-      ContainerData.prepareBaseData(this);
-      return result;
-    },
-    "MIXED"
-  );*/
-
   libWrapper.register(
     MODULE_ID,
     "dnd5e.dataModels.item.ContainerData.prototype.prepareDerivedData",
     function (wrapped: any, ...args: any) {
-      console.log("IN PREP DATA");
       let result = wrapped(...args);
       ContainerData.prepareDerivedData(this);
       return result;

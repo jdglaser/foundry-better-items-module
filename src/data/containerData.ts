@@ -5,21 +5,30 @@ export class ContainerData {
    * Prepare derived ItemData
    */
   static prepareDerivedData(data: any) {
-    console.log("PREP");
     this.#resolveSlots(data);
   }
 
-  static prepareBaseData(data: any) {
-    console.log("BASE:", data);
-    data.system.slots = {
-      value: 0,
-      resolvedValue: 0,
-      ifEquipped: null,
-      capacity: {
-        value: 0,
-        max: 0,
-      },
-    };
+  /* -------------------------------------------- */
+
+  /**
+   * Getter method for resolving container capacity slots. Needs to be a getter to avoid race conditions encountered
+   * when using prepareDerivedData
+   */
+  static getContainerCapacity(data: any) {
+    const contents = data.contents ?? [];
+    let totalSlots = 0;
+    for (const item of contents) {
+      if (item.type === "container") {
+        totalSlots += item.system.slotCapacity + item.system.slots.resolvedValue;
+      } else {
+        totalSlots += item.system.slots.resolvedValue;
+      }
+    }
+
+    const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
+    totalSlots += Math.ceil((cp + sp + ep + gp + pp) / 100);
+    console.log("totalSlots:", totalSlots);
+    return totalSlots;
   }
 
   /* -------------------------------------------- */
@@ -35,15 +44,11 @@ export class ContainerData {
     const parent = data.parent;
     const systemData = parent.system;
 
-    console.log("RESOLVE");
-
     const {
       value: defaultValue,
       ifEquipped: defaultIfEquipped,
       maxCapacity: defaultMaxCapacity,
     } = this.#resolveDefaultContainerSlots(data, parent, systemData);
-    const currentValue = this.#calculateContainerCurrentCapacity(data);
-    console.log("CURRENT VALUE:", currentValue);
 
     const value = valueOverride ?? defaultValue;
     const ifEquipped = ifEquippedOverride ?? defaultIfEquipped;
@@ -51,7 +56,7 @@ export class ContainerData {
 
     let resolvedValue = data.quantity * value;
 
-    if (ifEquipped !== null) {
+    if (ifEquipped !== null && data.equipped) {
       resolvedValue = data.quantity * ifEquipped;
     }
 
@@ -60,12 +65,9 @@ export class ContainerData {
       resolvedValue,
       ifEquipped,
       capacity: {
-        value: currentValue,
         max: maxCapacity,
       },
     };
-
-    console.log("SLOTS:", slots);
 
     data.slots = slots;
   }
@@ -77,28 +79,5 @@ export class ContainerData {
       ifEquipped: null,
       maxCapacity: 10,
     };
-  }
-
-  static #calculateContainerCurrentCapacity(data: any) {
-    const contents = data.contents;
-    console.log("CONTAINER:", data);
-    let totalSlots = 0;
-    for (const item of contents) {
-      console.log("SUB ITEM:", item);
-      if (item.type === "container") {
-        /*while (!item.system.slots) {
-          console.log("IN LOOP for ", item.name);
-          //await item.prepareBaseData();
-          await item.prepareDerivedData();
-        }*/
-        console.log("CONTAINER ITEM:", item);
-        console.log("CONTAINER ITEM SLOTS:", item.system.slots);
-        totalSlots += item.system.slots.capacity.value + item.system.slots.resolvedValue;
-      } else {
-        console.log("FAILED ITEM:", item);
-        totalSlots += item.system.slots.resolvedValue;
-      }
-    }
-    return totalSlots;
   }
 }

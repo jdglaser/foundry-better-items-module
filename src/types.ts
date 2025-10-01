@@ -7,7 +7,6 @@ export interface ItemSlots {
 }
 
 export interface ContainerCapacity {
-  value: number;
   max: number;
 }
 

@@ -17,7 +17,7 @@ export class CharacterData {
       ...data.parent.itemTypes.consumable,
       ...data.parent.itemTypes.loot,
       ...data.parent.itemTypes.weapon,
-      // TODO ...data.parent.itemTypes.container,
+      ...data.parent.itemTypes.container,
     ];
 
     let currentCapacity = 0;
@@ -30,8 +30,6 @@ export class CharacterData {
         currentCapacity += item.system.slots.resolvedValue;
       }
     }
-
-    // TODO: Handle containers
 
     currentCapacity += Math.ceil(tinyItems / 100);
 

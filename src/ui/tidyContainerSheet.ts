@@ -28,7 +28,6 @@ export class TidyContainerSheet {
    * Inject HTML for handling slot configuration for a container
    */
   static #injectSlotsDetails(html: HTMLElement, data: any) {
-    console.log("HEREEEE");
     // Get details tab of item sheet
     const detailsContent = html.querySelector("div.tidy-tab.details") as HTMLElement;
 
@@ -96,7 +95,6 @@ export class TidyContainerSheet {
    * Inject HTML for slots used
    */
   static #injectCapacitySlots(html: HTMLElement, data: any) {
-    console.log("BABA BA");
     // Remove legacy capacity settings
     const fieldsets = html.querySelectorAll("fieldset");
     const capacityFieldset = Array.from(fieldsets).find((fs) =>
@@ -115,10 +113,9 @@ export class TidyContainerSheet {
 
     // Update the capacity counter
     const capacityValueText = html.querySelector("span.capacity-value.text-data");
-    console.log("DATA:", data);
-    console.log("VALUE:", data.system.slots.capacity.value);
-    console.log("QTY:", data.system.quantity);
-    if (capacityValueText) capacityValueText.innerHTML = data.system.slots.capacity.value;
+    console.log("DATA IN injectCapacitySlots:", data);
+    console.log("slotCapacity:", data.system.slotCapacity);
+    if (capacityValueText) capacityValueText.innerHTML = data.system.slotCapacity;
 
     const capacityMaxText = html.querySelector("span.capacity-max.text-data");
     if (capacityMaxText) capacityMaxText.innerHTML = data.system.slots.capacity.max;
@@ -129,7 +126,6 @@ export class TidyContainerSheet {
 
     // Hide weight based capacity bar for container items
     const capacityBars = html.querySelectorAll('div[data-tidy-column-key="capacityBar"]') as NodeListOf<HTMLElement>;
-    console.log(capacityBars);
     for (const bar of capacityBars) {
       bar.style.display = "none";
     }

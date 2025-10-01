@@ -40,7 +40,7 @@ export class ItemData {
       resolvedValue = Math.ceil(data.quantity / stack) * value;
     }
 
-    if (ifEquipped !== null) {
+    if (ifEquipped !== null && data.equipped) {
       resolvedValue = data.quantity * ifEquipped;
     }
 
