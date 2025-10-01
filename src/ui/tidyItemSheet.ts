@@ -1,3 +1,4 @@
+import { MODULE_ID } from "../constants";
 import { ItemSlots } from "../types";
 import { Shared } from "./shared";
 
@@ -73,10 +74,10 @@ export class TidyItemSheet {
       const value = (ev.target as HTMLInputElement).value ?? stackInput.value;
       const parsedValue = parseInt(value);
       if (Number.isNaN(parsedValue)) {
-        await data.system.parent.unsetFlag("dnd5e-better-item-properties", "stack");
+        await data.system.parent.unsetFlag(MODULE_ID, "stack");
         stackInput.value = data.system.slots.stack;
       } else {
-        await data.system.parent.setFlag("dnd5e-better-item-properties", "stack", parsedValue);
+        await data.system.parent.setFlag(MODULE_ID, "stack", parsedValue);
       }
     });
 
@@ -96,7 +97,7 @@ export class TidyItemSheet {
 
     tinyInput.addEventListener("change", async (ev) => {
       const checked = (ev.target as HTMLInputElement).checked;
-      await data.system.parent.setFlag("dnd5e-better-item-properties", "tiny", checked);
+      await data.system.parent.setFlag(MODULE_ID, "tiny", checked);
     });
 
     tinyInputContainer.replaceChildren(tinyLabel, tinyInput);

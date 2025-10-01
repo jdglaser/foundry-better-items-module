@@ -1,3 +1,4 @@
+import { MODULE_ID } from "../constants";
 import { ItemSlots } from "../types";
 
 export class ItemData {
@@ -14,12 +15,11 @@ export class ItemData {
    * Resolve item slots for item
    */
   static #resolveItemSlots(data: any) {
-    const valueOverride = data.parent.getFlag("dnd5e-better-item-properties", "slots");
-    const stackOverride = data.parent.getFlag("dnd5e-better-item-properties", "stack");
-    const tinyOverride = data.parent.getFlag("dnd5e-better-item-properties", "tiny");
-    const ifEquippedOverride = data.parent.getFlag("dnd5e-better-item-properties", "ifEquipped");
+    const valueOverride = data.parent.getFlag(MODULE_ID, "slots");
+    const stackOverride = data.parent.getFlag(MODULE_ID, "stack");
+    const tinyOverride = data.parent.getFlag(MODULE_ID, "tiny");
+    const ifEquippedOverride = data.parent.getFlag(MODULE_ID, "ifEquipped");
 
-    // types {'weapon', 'equipment', 'consumable', 'loot', 'tool'}
     const parent = data.parent;
     const systemData = parent.system;
 

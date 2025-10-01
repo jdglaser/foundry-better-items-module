@@ -1,3 +1,4 @@
+import { MODULE_ID } from "../constants";
 import { ContainerSlots } from "../types";
 import { Shared } from "./shared";
 
@@ -69,10 +70,10 @@ export class TidyContainerSheet {
       const value = (ev.target as HTMLInputElement).value ?? capacityInput.value;
       const parsedValue = parseInt(value);
       if (Number.isNaN(parsedValue)) {
-        await data.system.parent.unsetFlag("dnd5e-better-item-properties", "maxCapacity");
+        await data.system.parent.unsetFlag(MODULE_ID, "maxCapacity");
         capacityInput.value = data.system.slots.capacity.max;
       } else {
-        await data.system.parent.setFlag("dnd5e-better-item-properties", "maxCapacity", parsedValue);
+        await data.system.parent.setFlag(MODULE_ID, "maxCapacity", parsedValue);
       }
     });
 

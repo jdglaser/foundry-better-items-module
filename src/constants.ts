@@ -1,7 +1,6 @@
-export const MODULE_ID = "dnd5e-better-item-properties";
+export const MODULE_ID = "dnd5e-item-improvements";
 
-export const BASE_COMPENDIUM_PATH =
-  "Compendium.dnd5e-better-item-properties.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage";
+export const BASE_COMPENDIUM_PATH = `Compendium.${MODULE_ID}.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage`;
 
 export const WEAPON_MASTERY_DOCUMENT_MAP = {
   topple: "fVcGobRFtXrAXPRI",

@@ -1,3 +1,4 @@
+import { MODULE_ID } from "../constants";
 import { ContainerSlots } from "../types";
 
 export class ContainerData {
@@ -37,9 +38,9 @@ export class ContainerData {
    * Resolve item slots for item
    */
   static #resolveSlots(data: any) {
-    const valueOverride = data.parent.getFlag("dnd5e-better-item-properties", "slots");
-    const ifEquippedOverride = data.parent.getFlag("dnd5e-better-item-properties", "ifEquipped");
-    const maxCapacityOverride = data.parent.getFlag("dnd5e-better-item-properties", "maxCapacity");
+    const valueOverride = data.parent.getFlag(MODULE_ID, "slots");
+    const ifEquippedOverride = data.parent.getFlag(MODULE_ID, "ifEquipped");
+    const maxCapacityOverride = data.parent.getFlag(MODULE_ID, "maxCapacity");
 
     const parent = data.parent;
     const systemData = parent.system;
@@ -72,6 +73,11 @@ export class ContainerData {
     data.slots = slots;
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * Resolves default slot data for containers
+   */
   static #resolveDefaultContainerSlots(data: any, parent: any, systemData: any) {
     // TODO
     return {

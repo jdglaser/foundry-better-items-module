@@ -1,3 +1,5 @@
+import { MODULE_ID } from "../constants";
+
 export class Shared {
   static getSlotsInputComponent(data: any) {
     const slotsInputContainer = document.createElement("div");
@@ -16,10 +18,10 @@ export class Shared {
       const value = (ev.target as HTMLInputElement).value ?? slotsInput.value;
       const parsedValue = parseInt(value);
       if (Number.isNaN(parsedValue)) {
-        await data.system.parent.unsetFlag("dnd5e-better-item-properties", "slots");
+        await data.system.parent.unsetFlag(MODULE_ID, "slots");
         slotsInput.value = data.system.slots.value;
       } else {
-        await data.system.parent.setFlag("dnd5e-better-item-properties", "slots", parsedValue);
+        await data.system.parent.setFlag(MODULE_ID, "slots", parsedValue);
       }
     });
 
@@ -43,10 +45,10 @@ export class Shared {
       const value = (ev.target as HTMLInputElement).value ?? ifEquippedInput.value;
       const parsedValue = parseInt(value);
       if (Number.isNaN(parsedValue)) {
-        await data.system.parent.unsetFlag("dnd5e-better-item-properties", "ifEquipped");
+        await data.system.parent.unsetFlag(MODULE_ID, "ifEquipped");
         ifEquippedInput.value = data.system.slots.ifEquipped;
       } else {
-        await data.system.parent.setFlag("dnd5e-better-item-properties", "ifEquipped", parsedValue);
+        await data.system.parent.setFlag(MODULE_ID, "ifEquipped", parsedValue);
       }
     });
 
