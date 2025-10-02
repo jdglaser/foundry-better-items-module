@@ -8,7 +8,7 @@ export class TidyContainerSheet {
    */
   static render(html: HTMLElement, data: any) {
     this.#injectSlotsDetails(html, data);
-    this.#injectCapacitySlots(html, data);
+    this.#replaceHTMLElements(html, data);
     Shared.injectWeightValue(html, this.#formatSlotsShorthand(data.system.slots));
     Shared.toggleSlotsDetailsLock(html, data);
   }
@@ -81,13 +81,6 @@ export class TidyContainerSheet {
 
     // Inject elements
     formFields.replaceChildren(slotsInputContainer, ifEquippedInputContainer, capacityInputContainer);
-
-    // Update all weight rows to slots
-    // TODO: Update weight value
-    //const slotRows = detailsContent.querySelectorAll('div[data-tidy-column-key="weight"]');
-    /*for (const row of slotRows) {
-      row.innerHTML = `<span>${data.system.slots</span>`
-    }*/
   }
 
   /* -------------------------------------------- */
@@ -95,7 +88,7 @@ export class TidyContainerSheet {
   /**
    * Inject HTML for slots used
    */
-  static #injectCapacitySlots(html: HTMLElement, data: any) {
+  static #replaceHTMLElements(html: HTMLElement, data: any) {
     // Remove legacy capacity settings
     const fieldsets = html.querySelectorAll("fieldset");
     const capacityFieldset = Array.from(fieldsets).find((fs) =>
@@ -114,15 +107,13 @@ export class TidyContainerSheet {
 
     // Update the capacity counter
     const capacityValueText = html.querySelector("span.capacity-value.text-data");
-    console.log("DATA IN injectCapacitySlots:", data);
-    console.log("slotCapacity:", data.system.slotCapacity);
     if (capacityValueText) capacityValueText.innerHTML = data.system.slotCapacity;
 
     const capacityMaxText = html.querySelector("span.capacity-max.text-data");
     if (capacityMaxText) capacityMaxText.innerHTML = data.system.slots.capacity.max;
 
     // Remove progress meter
-    const progressMeter = html.querySelector("meter.progress.capacity");
+    const progressMeter = html.querySelector(".meter.progress.capacity");
     if (progressMeter) progressMeter.remove();
 
     // Hide weight based capacity bar for container items
@@ -130,5 +121,51 @@ export class TidyContainerSheet {
     for (const bar of capacityBars) {
       bar.style.display = "none";
     }
+
+    // Update all weight rows to slots
+    html.querySelectorAll('[data-tidy-column-key="weight"]').forEach((el) => {
+      if (el.textContent.trim() === "Weight") {
+        el.textContent = "Slots";
+      }
+    });
+
+    console.log("CONTAINER:", data);
+    data.system.contents.forEach((c: any) => console.log("CONTENT ITEM:", c));
+    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((el) => {
+      const row = el.closest("[data-item-id]") as HTMLElement | null;
+      if (!row) return;
+
+      const itemId = row.dataset.itemId;
+      console.log(itemId);
+      const item = data.system.getContainedItem(itemId);
+
+      const slotLabel = "slot" + (item.system.slots.resolvedValue > 1 ? "s" : "");
+      el.innerHTML = `<span>${item.system.slots.resolvedValue} <span class="color-text-lighter">slots</span></span>`;
+    });
+
+    // Replace container capacity tracker cells
+    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach((el) => {
+      const row = el.closest("[data-item-id]") as HTMLElement | null;
+      if (!row) return;
+
+      const itemId = row.dataset.itemId;
+      const item = data.system.getContainedItem(itemId);
+
+      // Grab slots
+      const used = item.system.slotCapacity;
+      const max = item.system.slots.capacity.max;
+
+      // Replace HTML
+      el.innerHTML = `
+      <div class="inline-container-capacity-tracker">
+        <div class="label">
+          <span class="value font-weight-label">${used}</span>
+          <span class="separator">/</span>
+          <span class="max color-text-default">${max}</span>
+          <span class="units color-text-lightest">slots</span>
+        </div>
+      </div>
+    `;
+    });
   }
 }

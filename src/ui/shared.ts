@@ -11,7 +11,6 @@ export class Shared {
     slotsInput.classList.add("better-items-slots");
     slotsInput.type = "number";
     slotsInput.min = "0";
-    console.log("DATA IN SLOTS:", data);
     slotsInput.value = data.system.slots.value;
 
     slotsInput.addEventListener("focusout", async (ev) => {
