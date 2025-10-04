@@ -113,8 +113,10 @@ export class TidyContainerSheet {
     if (capacityMaxText) capacityMaxText.innerHTML = data.system.slots.capacity.max;
 
     // Remove progress meter
-    const progressMeter = html.querySelector(".meter.progress.capacity");
-    if (progressMeter) progressMeter.remove();
+    const progressMeters = html.querySelectorAll(".meter.progress.capacity");
+    for (const meter of progressMeters) {
+      meter.remove();
+    }
 
     // Hide weight based capacity bar for container items
     const capacityBars = html.querySelectorAll('div[data-tidy-column-key="capacityBar"]') as NodeListOf<HTMLElement>;
@@ -128,19 +130,19 @@ export class TidyContainerSheet {
         el.textContent = "Slots";
       }
     });
-
-    console.log("CONTAINER:", data);
     data.system.contents.forEach((c: any) => console.log("CONTENT ITEM:", c));
     html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((el) => {
       const row = el.closest("[data-item-id]") as HTMLElement | null;
       if (!row) return;
 
       const itemId = row.dataset.itemId;
-      console.log(itemId);
       const item = data.system.getContainedItem(itemId);
 
-      const slotLabel = "slot" + (item.system.slots.resolvedValue > 1 ? "s" : "");
-      el.innerHTML = `<span>${item.system.slots.resolvedValue} <span class="color-text-lighter">slots</span></span>`;
+      const slotValue = item.system.slots.tiny
+        ? Math.ceil(item.system.quantity / 100)
+        : item.system.slots.resolvedValue;
+      const slotLabel = "slot" + (slotValue > 1 ? "s" : "");
+      el.innerHTML = `<span>${slotValue} <span class="color-text-lighter">${slotLabel}</span></span>`;
     });
 
     // Replace container capacity tracker cells

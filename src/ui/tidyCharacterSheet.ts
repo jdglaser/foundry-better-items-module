@@ -35,6 +35,52 @@ export class TidyCharacterSheet {
     for (const bar of capacityBars) {
       bar.style.display = "none";
     }
+
+    // Update all weight rows to slots
+    inventoryContentHtml.querySelectorAll('[data-tidy-column-key="weight"]').forEach((el) => {
+      if (el.textContent.trim() === "Weight") {
+        el.textContent = "Slots";
+      }
+    });
+
+    inventoryContentHtml.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((el) => {
+      const row = el.closest("[data-item-id]") as HTMLElement | null;
+      if (!row) return;
+
+      const itemId = row.dataset.itemId;
+      const item = data.actor.collections.items.get(itemId);
+
+      const slotValue = item.system.slots.tiny
+        ? Math.ceil(item.system.quantity / 100)
+        : item.system.slots.resolvedValue;
+      const slotLabel = "slot" + (slotValue > 1 ? "s" : "");
+      el.innerHTML = `<span>${slotValue} <span class="color-text-lighter">${slotLabel}</span></span>`;
+    });
+
+    // Replace container capacity tracker cells
+    inventoryContentHtml.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach((el) => {
+      const row = el.closest("[data-item-id]") as HTMLElement | null;
+      if (!row) return;
+
+      const itemId = row.dataset.itemId;
+      const item = data.actor.collections.items.get(itemId);
+
+      // Grab slots
+      const used = item.system.slotCapacity;
+      const max = item.system.slots.capacity.max;
+
+      // Replace HTML
+      el.innerHTML = `
+      <div class="inline-container-capacity-tracker">
+        <div class="label">
+          <span class="value font-weight-label">${used}</span>
+          <span class="separator">/</span>
+          <span class="max color-text-default">${max}</span>
+          <span class="units color-text-lightest">slots</span>
+        </div>
+      </div>
+    `;
+    });
   }
 
   /**

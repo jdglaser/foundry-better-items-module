@@ -18,16 +18,19 @@ export class ContainerData {
   static getContainerCapacity(data: any) {
     const contents = data.contents ?? [];
     let totalSlots = 0;
+    const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
+    let tinyItems = cp + sp + ep + gp + pp;
     for (const item of contents) {
       if (item.type === "container") {
         totalSlots += item.system.slotCapacity + item.system.slots.resolvedValue;
+      } else if (item.system.slots.tiny) {
+        tinyItems += item.system.quantity;
       } else {
         totalSlots += item.system.slots.resolvedValue;
       }
     }
 
-    const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
-    totalSlots += Math.ceil((cp + sp + ep + gp + pp) / 100);
+    totalSlots += Math.ceil(tinyItems / 100);
     return totalSlots;
   }
 
