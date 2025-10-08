@@ -20,6 +20,11 @@ export class TidyItemSheet {
     Shared.toggleSlotsDetailsLock(html, data);
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * Inject better mastery and property information on pills
+   */
   static async #injectItemHoverPills(html: HTMLElement, data: any) {
     // Only weapons and armor/equipment
     const type = data.data.type;
