@@ -1,6 +1,13 @@
-import { MODULE_ID } from "../constants";
+import {
+  AMMO_TYPE_MAP,
+  MODULE_ID,
+  RANGE_REGEX,
+  WEAPON_MASTERY_DOCUMENT_MAP,
+  WEAPON_PROPERTY_DOCUMENT_MAP,
+} from "../constants";
 import { ItemSlots } from "../types";
 import { Shared } from "./shared";
+import { getDocumentReferenceHtml, steppedDenomination, titleCase } from "../utils";
 
 export class TidyItemSheet {
   /**
@@ -8,8 +15,119 @@ export class TidyItemSheet {
    */
   static render(html: HTMLElement, data: any) {
     this.#injectSlotsDetails(html, data);
+    this.#injectItemHoverPills(html, data);
     Shared.injectWeightValue(html, this.#formatSlotsShorthand(data.system.slots));
     Shared.toggleSlotsDetailsLock(html, data);
+  }
+
+  static async #injectItemHoverPills(html: HTMLElement, data: any) {
+    // Only weapons and armor/equipment
+    const type = data.data.type;
+    if (!["weapon", "equipment"].includes(type)) return;
+
+    const systemData = data.data.system;
+
+    // Handle Actions
+    const actionDiv = Array.from(html.querySelectorAll("div")).find(
+      (div) => div.querySelector("h4")?.textContent?.trim() === "Action"
+    );
+
+    // TODO: Handle in function so we can early return only there
+    if (!actionDiv) return;
+
+    const actionPillList = actionDiv.querySelector("ul.pills.stacked");
+    if (!actionPillList) return;
+
+    actionPillList.querySelectorAll("li.pill").forEach(async (li) => {
+      const label = li.textContent?.trim();
+
+      if (RANGE_REGEX.test(label)) {
+        const enrichedhtml = await getDocumentReferenceHtml("range", "Range");
+        li.replaceChildren(enrichedhtml, label);
+      }
+    });
+
+    // Handle Properties
+    const propertyDiv = Array.from(html.querySelectorAll("div")).find(
+      (div) => div.querySelector("h4")?.textContent?.trim() === "Properties"
+    );
+
+    // TODO: Handle in function
+    if (!propertyDiv) return;
+
+    const pillList = propertyDiv.querySelector("ul.pills.stacked");
+    if (!pillList) return;
+
+    // Loop through each <li class="pill">
+    pillList.querySelectorAll("li.pill").forEach(async (li) => {
+      const label = li.textContent?.trim();
+      const identifier = label.toLowerCase() ?? "";
+      if (!(identifier in { ...WEAPON_MASTERY_DOCUMENT_MAP, ...WEAPON_PROPERTY_DOCUMENT_MAP })) {
+        return;
+      }
+
+      const enrichedhtml = await getDocumentReferenceHtml(identifier, label);
+      switch (identifier) {
+        case "versatile":
+          const versatileDamageNumber = systemData.damage.base.number;
+          const versatileDamageDenomination = steppedDenomination(systemData.damage.base.denomination);
+
+          li.replaceChildren(
+            enrichedhtml,
+            document.createTextNode(` (${versatileDamageNumber}d${versatileDamageDenomination})`)
+          );
+          break;
+        case "ammunition":
+        case "thrown":
+          const rangeNormal = systemData.range.value;
+          const rangeLong = systemData.range.long;
+          const rangeUnits = systemData.range.units;
+
+          let enrichedAmmoHTML = null;
+          if (systemData.ammunition.type) {
+            const ammoType = systemData.ammunition.type;
+            const [label, itemDocument] = AMMO_TYPE_MAP[ammoType];
+            const enrichedAmmoHTMLString = await foundry.applications.ux.TextEditor.enrichHTML(
+              `@UUID[${itemDocument}]{${label}}`
+            );
+            const template = document.createElement("template");
+            template.innerHTML = enrichedAmmoHTMLString.trim();
+            enrichedAmmoHTML = template.content.firstElementChild as HTMLElement;
+          }
+
+          const parenSpan = document.createElement("span");
+          if (enrichedAmmoHTML) {
+            parenSpan.replaceChildren(`(${rangeNormal}/${rangeLong} ${rangeUnits}, `, enrichedAmmoHTML, ")");
+          } else {
+            parenSpan.replaceChildren(`(${rangeNormal}/${rangeLong} ${rangeUnits})`);
+          }
+
+          li.replaceChildren(enrichedhtml, parenSpan);
+          break;
+        case "reload":
+          const reloadShots = systemData.uses.max;
+
+          li.replaceChildren(enrichedhtml, document.createTextNode(` (${reloadShots} shots)`));
+          break;
+        default:
+          li.replaceChildren(enrichedhtml);
+      }
+    });
+
+    console.log(systemData);
+    if (["automatic-rifle"].includes(systemData.identifier)) {
+      const enrichedhtml = await getDocumentReferenceHtml("burst-fire", "Burst Fire");
+      pillList.insertAdjacentHTML("beforeend", `<li class="pill centered mastery">${enrichedhtml.outerHTML}</li>`);
+    }
+
+    const mastery = systemData.mastery;
+    if (mastery && !html.querySelector("li.mastery")) {
+      const enrichedhtml = await getDocumentReferenceHtml(mastery, titleCase(mastery));
+      pillList.insertAdjacentHTML(
+        "beforeend",
+        `<li class="pill centered mastery"><span class="text-normal">Mastery</span> ${enrichedhtml.outerHTML}</li>`
+      );
+    }
   }
 
   /* -------------------------------------------- */

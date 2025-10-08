@@ -4,6 +4,45 @@ export class CharacterData {
    */
   static async prepareDerivedData(data: any) {
     this.#resolveSlotBasedEnumberance(data);
+    this.#handleEquipmentProficiency(data);
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Resolve equipment proficiency penalties
+   */
+  static async #handleEquipmentProficiency(data: any) {
+    const ac = data.attributes.ac;
+
+    const { armors, shields } = data.parent.itemTypes.equipment.reduce(
+      (obj: any, equip: any) => {
+        if (!equip.system.equipped || !(equip.system.type.value in CONFIG.DND5E.armorTypes)) return obj;
+        if (equip.system.type.value === "shield") obj.shields.push(equip);
+        else obj.armors.push(equip);
+        return obj;
+      },
+      { armors: [], shields: [] }
+    );
+
+    const isProficientShields = data.traits.armorProf.value.has("shl");
+
+    if (shields.length && !isProficientShields) {
+      ac.shield = 0;
+      ac.value = Math.max(ac.min, ac.base + ac.shield + ac.bonus + ac.cover);
+    }
+
+    let wearingNonProficientArmor = false;
+
+    armors.forEach((armor: any) => {
+      if (armor.system.proficiencyMultiplier === 0) {
+        wearingNonProficientArmor = true;
+      }
+    });
+
+    if (wearingNonProficientArmor) {
+      data.attributes.movement.walk -= 10;
+    }
   }
 
   /* -------------------------------------------- */

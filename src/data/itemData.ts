@@ -59,7 +59,6 @@ export class ItemData {
    * Resolve default item slots for item
    */
   static #resolveDefaultItemSlots(itemData: any, parentData: any, systemData: any) {
-    console.log("itemData:", itemData);
     let stack = 1;
     let value = 1;
     let tiny = false;
@@ -135,7 +134,7 @@ export class ItemData {
     )
       tiny = true;
 
-    if (["candle", "torch", "rations"].includes(itemData.identifier)) {
+    if (["candle", "torch", "rations", "ink-pen", "lock"].includes(itemData.identifier)) {
       stack = 5;
     }
 
