@@ -1,10 +1,10 @@
-var P = (u) => {
+var V = (u) => {
   throw TypeError(u);
 };
-var ce = (u, e, t) => e.has(u) || P("Cannot " + t);
-var q = (u, e, t) => e.has(u) ? P("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(u) : e.set(u, t);
+var ce = (u, e, t) => e.has(u) || V("Cannot " + t);
+var E = (u, e, t) => e.has(u) ? V("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(u) : e.set(u, t);
 var g = (u, e, t) => (ce(u, e, "access private method"), t);
-const f = "dnd5e-item-improvements", pe = `Compendium.${f}.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage`, V = {
+const y = "dnd5e-item-improvements", pe = `Compendium.${y}.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage`, F = {
   cleave: "2GQhl3IJLZGyuHow",
   graze: "mDnObAO0FapBEe7W",
   nick: "HAkYfqwjw3afUReb",
@@ -13,7 +13,7 @@ const f = "dnd5e-item-improvements", pe = `Compendium.${f}.rules-reference.Journ
   slow: "Ily8fxxcCqnZw7bV",
   topple: "fVcGobRFtXrAXPRI",
   vex: "UYnxxrKjfBE5UBl0"
-}, F = {
+}, O = {
   ammunition: "pAMRJM7AtX2HHdCs",
   finesse: "WJFU13zVwyLNRa8A",
   heavy: "H8FtHo6Rtf5qcVTO",
@@ -34,25 +34,25 @@ const f = "dnd5e-item-improvements", pe = `Compendium.${f}.rules-reference.Journ
   energyCell: ["Energy Cell", ""],
   blowgunNeedle: ["Needle", "Compendium.dnd-players-handbook.equipment.Item.phbamoNeedles000"]
 }, de = /^\d+\/\d+\s*ft$/i;
-var w, B, W;
-class O {
+var S, R, W;
+class B {
   /**
    * Prepare derived CharacterData
    */
   static async prepareDerivedData(e) {
-    g(this, w, W).call(this, e), g(this, w, B).call(this, e);
+    g(this, S, W).call(this, e), g(this, S, R).call(this, e);
   }
 }
-w = new WeakSet(), B = async function(e) {
+S = new WeakSet(), R = async function(e) {
   const t = e.attributes.ac, { armors: i, shields: s } = e.parent.itemTypes.equipment.reduce(
-    (c, o) => (!o.system.equipped || !(o.system.type.value in CONFIG.DND5E.armorTypes) || (o.system.type.value === "shield" ? c.shields.push(o) : c.armors.push(o)), c),
+    (p, c) => (!c.system.equipped || !(c.system.type.value in CONFIG.DND5E.armorTypes) || (c.system.type.value === "shield" ? p.shields.push(c) : p.armors.push(c)), p),
     { armors: [], shields: [] }
-  ), a = e.traits.armorProf.value.has("shl");
-  s.length && !a && (t.shield = 0, t.value = Math.max(t.min, t.base + t.shield + t.bonus + t.cover));
-  let p = !1;
-  i.forEach((c) => {
-    c.system.proficiencyMultiplier === 0 && (p = !0);
-  }), p && (e.attributes.movement.walk -= 10);
+  ), r = e.traits.armorProf.value.has("shl");
+  s.length && !r && (t.shield = 0, t.value = Math.max(t.min, t.base + t.shield + t.bonus + t.cover));
+  let l = !1;
+  i.forEach((p) => {
+    p.system.proficiencyMultiplier === 0 && (l = !0);
+  }), l && (e.attributes.movement.walk -= 10);
 }, W = async function(e) {
   const t = [
     ...e.parent.itemTypes.equipment,
@@ -62,22 +62,22 @@ w = new WeakSet(), B = async function(e) {
     ...e.parent.itemTypes.container
   ];
   let i = 0;
-  const { cp: s = 0, sp: a = 0, ep: p = 0, gp: c = 0, pp: o = 0 } = e.currency;
-  let d = s + a + p + c + o;
-  for (const r of t)
-    r.system.slots.tiny ? d += r.system.quantity : i += r.system.slots.resolvedValue;
+  const { cp: s = 0, sp: r = 0, ep: l = 0, gp: p = 0, pp: c = 0 } = e.currency;
+  let d = s + r + l + p + c;
+  for (const a of t)
+    a.system.slots.tiny ? d += a.system.quantity : i += a.system.slots.resolvedValue;
   i += Math.ceil(d / 100), e.slotBasedEncumberance = {
     value: i,
     max: e.abilities.str.value + 10
   };
-}, q(O, w);
-var x, R, G;
+}, E(B, S);
+var x, G, U;
 class A {
   /**
    * Prepare derived ItemData
    */
   static prepareDerivedData(e) {
-    g(this, x, R).call(this, e);
+    g(this, x, G).call(this, e);
   }
   /* -------------------------------------------- */
   /**
@@ -87,66 +87,78 @@ class A {
   static async getContainerCapacity(e) {
     const t = await e.contents ?? [];
     let i = 0;
-    const { cp: s = 0, sp: a = 0, ep: p = 0, gp: c = 0, pp: o = 0 } = e.currency;
-    let d = s + a + p + c + o;
-    for (const r of t)
-      if (r.type === "container") {
-        const n = await r.system.slotCapacity;
+    const { cp: s = 0, sp: r = 0, ep: l = 0, gp: p = 0, pp: c = 0 } = e.currency;
+    let d = s + r + l + p + c;
+    for (const a of t)
+      if (a.type === "container") {
+        const n = await a.system.slotCapacity;
         i += n;
-      } else r.system.slots.tiny ? d += r.system.quantity : i += r.system.slots.resolvedValue;
+      } else a.system.slots.tiny ? d += a.system.quantity : i += a.system.slots.resolvedValue;
     return i += Math.ceil(d / 100), i;
   }
 }
-x = new WeakSet(), R = function(e) {
-  const t = e.parent.getFlag(f, "slots"), i = e.parent.getFlag(f, "ifEquipped"), s = e.parent.getFlag(f, "maxCapacity"), a = e.parent, p = a.system, {
-    value: c,
-    ifEquipped: o,
+x = new WeakSet(), G = function(e) {
+  const t = e.parent.getFlag(y, "slots"), i = e.parent.getFlag(y, "ifEquipped"), s = e.parent.getFlag(y, "maxCapacity"), r = e.parent, l = r.system, {
+    value: p,
+    ifEquipped: c,
     maxCapacity: d
-  } = g(this, x, G).call(this, e, a, p), r = t ?? c, n = i ?? o, l = s ?? d;
-  let m = e.quantity * r;
+  } = g(this, x, U).call(this, e, r, l), a = t ?? p, n = i ?? c, o = s ?? d;
+  let m = e.quantity * a;
   n !== null && e.equipped && (m = e.quantity * n);
-  const y = {
-    value: r,
+  const f = {
+    value: a,
     resolvedValue: m,
     ifEquipped: n,
     capacity: {
-      max: l
+      max: o
     }
   };
-  e.slots = y;
-}, G = function(e, t, i) {
+  e.slots = f;
+}, U = function(e, t, i) {
   return {
     value: 1,
     ifEquipped: null,
     maxCapacity: 10
   };
-}, q(A, x);
+}, E(A, x);
 var k, j, X;
-class U {
+class D {
   /**
    * Prepare derived ItemData
    */
   static prepareDerivedData(e) {
     g(this, k, j).call(this, e);
   }
+  /* -------------------------------------------- */
+  /**
+   * Resolve item slots for item
+   */
+  static async updateRichTooltip(e, t) {
+    const s = new DOMParser().parseFromString(t, "text/html"), r = s.querySelector(".weight");
+    if (r) {
+      const l = r.querySelector("span");
+      l && (e.slots.tiny ? l.textContent = "Tiny" : e.slots.stack !== e.slots.resolvedValue ? l.textContent = `${e.slots.resolvedValue} (x${e.slots.stack})` : l.textContent = e.slots.resolvedValue);
+    }
+    return s.body.innerHTML.trim();
+  }
 }
 k = new WeakSet(), j = function(e) {
-  const t = e.parent.getFlag(f, "slots"), i = e.parent.getFlag(f, "stack"), s = e.parent.getFlag(f, "tiny"), a = e.parent.getFlag(f, "ifEquipped"), p = e.parent, c = p.system, {
-    value: o,
+  const t = e.parent.getFlag(y, "slots"), i = e.parent.getFlag(y, "stack"), s = e.parent.getFlag(y, "tiny"), r = e.parent.getFlag(y, "ifEquipped"), l = e.parent, p = l.system, {
+    value: c,
     stack: d,
-    tiny: r,
+    tiny: a,
     ifEquipped: n
-  } = g(this, k, X).call(this, e, p, c), l = t ?? o, m = i ?? d, y = s ?? r, h = a ?? n;
-  let v = e.quantity * l;
-  m > 1 && (v = Math.ceil(e.quantity / m) * l), h !== null && e.equipped && (v = e.quantity * h), e.slots = {
-    value: l,
+  } = g(this, k, X).call(this, e, l, p), o = t ?? c, m = i ?? d, f = s ?? a, h = r ?? n;
+  let v = e.quantity * o;
+  m > 1 && (v = Math.ceil(e.quantity / m) * o), h !== null && e.equipped && (v = e.quantity * h), e.slots = {
+    value: o,
     resolvedValue: v,
     stack: m,
-    tiny: y,
+    tiny: f,
     ifEquipped: h
   };
 }, X = function(e, t, i) {
-  let s = 1, a = 1, p = !1, c = null;
+  let s = 1, r = 1, l = !1, p = null;
   if (e.type && e.type.value === "ammo")
     switch (e.identifier) {
       case "arrows":
@@ -168,61 +180,61 @@ k = new WeakSet(), j = function(e) {
   if (t.type === "equipment" && e.type)
     switch (e.type.value) {
       case "heavy":
-        ["plate-armor", "splint-armor"].includes(e.identifier) ? a = 3 : a = 2;
+        ["plate-armor", "splint-armor"].includes(e.identifier) ? r = 3 : r = 2;
         break;
       case "medium":
-        a = 2;
+        r = 2;
         break;
       case "light":
-        a = 1;
+        r = 1;
         break;
     }
-  return ["gunpowder-keg"].includes(e.identifier) && (a = 2), ["ladder"].includes(e.identifier) && (a = 3), t.type === "weapon" && ["hvy", "two"].some((o) => e.properties.has(o)) && (a = 2), (["clothes-fine", "clothes-travelers", "fine-clothes", "costume"].includes(e.identifier) || e.identifier.startsWith("belt") || e.identifier.startsWith("boots") || e.identifier.startsWith("bracers") || e.identifier.includes("robe")) && (c = 0), ["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(e.identifier) && (a = 0), (e.type && ["gem", "ring"].includes(e.type.value) || ["string"].includes(e.identifier) || e.identifier.startsWith("figurine") || e.identifier.includes("ioun-stone") || e.identifier.includes("amulet") || e.identifier.startsWith("bead-")) && (p = !0), ["candle", "torch", "rations", "ink-pen", "lock"].includes(e.identifier) && (s = 5), ["tent"].includes(e.identifier) && (a = 2), e.type && ["potion", "poison"].includes(e.type.value) && (s = 3), (e.type && e.type.value === "scroll" || ["scroll", "map", "parchment", "paper"].includes(e.identifier)) && (s = 20), {
-    value: a,
+  return ["gunpowder-keg"].includes(e.identifier) && (r = 2), ["ladder"].includes(e.identifier) && (r = 3), t.type === "weapon" && ["hvy", "two"].some((c) => e.properties.has(c)) && (r = 2), (["clothes-fine", "clothes-travelers", "fine-clothes", "costume"].includes(e.identifier) || e.identifier.startsWith("belt") || e.identifier.startsWith("boots") || e.identifier.startsWith("bracers") || e.identifier.includes("robe")) && (p = 0), ["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(e.identifier) && (r = 0), (e.type && ["gem", "ring"].includes(e.type.value) || ["string"].includes(e.identifier) || e.identifier.startsWith("figurine") || e.identifier.includes("ioun-stone") || e.identifier.includes("amulet") || e.identifier.startsWith("bead-")) && (l = !0), ["candle", "torch", "rations", "ink-pen", "lock"].includes(e.identifier) && (s = 5), ["tent"].includes(e.identifier) && (r = 2), e.type && ["potion", "poison"].includes(e.type.value) && (s = 3), (e.type && e.type.value === "scroll" || ["scroll", "map", "parchment", "paper"].includes(e.identifier)) && (s = 20), {
+    value: r,
     stack: s,
-    tiny: p,
-    ifEquipped: c
+    tiny: l,
+    ifEquipped: p
   };
-}, q(U, k);
-var I, J, Q;
+}, E(D, k);
+var T, J, Q;
 class _ {
   /**
    * Render the TidyCharacterSheet changes
    */
   static render(e, t) {
-    g(this, I, J).call(this, e, t);
+    g(this, T, J).call(this, e, t);
   }
 }
-I = new WeakSet(), J = async function(e, t) {
+T = new WeakSet(), J = async function(e, t) {
   const i = e.querySelector("div.inventory-content");
   if (!i) return;
   const s = i.querySelector("div.encumbrance-details");
   if (!s) return;
-  const { value: a, max: p } = t.system.slotBasedEncumberance;
+  const { value: r, max: l } = t.system.slotBasedEncumberance;
   s.innerHTML = `
       <div class="pill flexshrink"><span class="text-normal">Strength</span> <span>${t.system.abilities.str.value}</span></div>
-      ${g(this, I, Q).call(this, a, p, "fas fa-weight-hanging", "Item Slots")}
+      ${g(this, T, Q).call(this, r, l, "fas fa-weight-hanging", "Item Slots")}
     `;
-  const c = i.querySelectorAll(
+  const p = i.querySelectorAll(
     'div[data-tidy-column-key="capacityBar"]'
   );
-  for (const o of c)
-    o.style.display = "none";
-  i.querySelectorAll('[data-tidy-column-key="weight"]').forEach((o) => {
-    o.textContent.trim() === "Weight" && (o.textContent = "Slots");
-  }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((o) => {
-    const d = o.closest("[data-item-id]");
+  for (const c of p)
+    c.style.display = "none";
+  i.querySelectorAll('[data-tidy-column-key="weight"]').forEach((c) => {
+    c.textContent.trim() === "Weight" && (c.textContent = "Slots");
+  }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((c) => {
+    const d = c.closest("[data-item-id]");
     if (!d) return;
-    const r = d.dataset.itemId, n = t.actor.collections.items.get(r), l = n.system.slots.tiny ? Math.ceil(n.system.quantity / 100) : n.system.slots.resolvedValue, m = "slot" + (l === 1 ? "" : "s");
-    o.innerHTML = `<span>${l} <span class="color-text-lighter">${m}</span></span>`;
-  }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (o) => {
-    const d = o.closest("[data-item-id]");
+    const a = d.dataset.itemId, n = t.actor.collections.items.get(a), o = n.system.slots.tiny ? Math.ceil(n.system.quantity / 100) : n.system.slots.resolvedValue, m = "slot" + (o === 1 ? "" : "s");
+    c.innerHTML = `<span>${o} <span class="color-text-lighter">${m}</span></span>`;
+  }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (c) => {
+    const d = c.closest("[data-item-id]");
     if (!d) return;
-    const r = d.dataset.itemId, n = t.actor.collections.items.get(r), l = await n.system.slotCapacity, m = n.system.slots.capacity.max;
-    o.innerHTML = `
+    const a = d.dataset.itemId, n = t.actor.collections.items.get(a), o = await n.system.slotCapacity, m = n.system.slots.capacity.max;
+    c.innerHTML = `
       <div class="inline-container-capacity-tracker">
         <div class="label">
-          <span class="value font-weight-label">${l}</span>
+          <span class="value font-weight-label">${o}</span>
           <span class="separator">/</span>
           <span class="max color-text-default">${m}</span>
           <span class="units color-text-lightest">slots</span>
@@ -231,17 +243,17 @@ I = new WeakSet(), J = async function(e, t) {
     `;
   });
 }, Q = function(e, t, i, s) {
-  const a = Math.round(e / t * 100);
+  const r = Math.round(e / t * 100);
   return `
       <div role="meter" 
         aria-valuemin="0" 
         data-tooltip-direction="UP" 
         data-tooltip="${s}"
-        class="meter progress encumbrance theme-dark medium${a >= 100 ? "high" : ""}" 
+        class="meter progress encumbrance theme-dark medium${r >= 100 ? "high" : ""}" 
         aria-valuenow="${e / t * 100}" 
         aria-valuetext="${e}" 
         aria-valuemax="${t}" 
-        style="--bar-percentage: ${a}%; 
+        style="--bar-percentage: ${r}%; 
         --encumbrance-low: 33.333333333333336%; 
         --encumbrance-high: 66.66666666666667%;">
           <div class="label">
@@ -256,23 +268,23 @@ I = new WeakSet(), J = async function(e, t) {
           <i class="breakpoint encumbrance-high arrow-down" role="presentation"></i>
         </div>
     `;
-}, q(_, I);
-const $ = [4, 6, 8, 10, 12, 20, 100];
+}, E(_, T);
+const H = [4, 6, 8, 10, 12, 20, 100];
 function me(u, e = 1) {
-  return $[Math.min($.indexOf(u) + e, $.length - 1)] ?? null;
+  return H[Math.min(H.indexOf(u) + e, H.length - 1)] ?? null;
 }
 function ye(u) {
-  const e = { ...V, ...F }[u];
+  const e = { ...F, ...O }[u];
   return `${pe}.${e}`;
 }
 function fe(u, e) {
   return `@UUID[${ye(u)}]{${e}}`;
 }
-async function L(u, e) {
+async function M(u, e) {
   const t = await foundry.applications.ux.TextEditor.enrichHTML(fe(u, e)), i = document.createElement("template");
   i.innerHTML = t.trim();
-  const s = i.content.firstElementChild, a = s.querySelector("i.fa-solid");
-  return a && a.remove(), s;
+  const s = i.content.firstElementChild, r = s.querySelector("i.fa-solid");
+  return r && r.remove(), s;
 }
 function he(u) {
   return u.toLowerCase().replace(/\b\w/g, (e) => e.toUpperCase());
@@ -287,9 +299,9 @@ class b {
     const i = document.createElement("label");
     i.innerHTML = "Slots";
     const s = document.createElement("input");
-    return s.classList.add("better-items-slots"), s.type = "number", s.min = "0", s.value = e.system.slots.value, s.addEventListener("focusout", async (a) => {
-      const p = a.target.value ?? s.value, c = parseInt(p);
-      Number.isNaN(c) ? (await e.system.parent.unsetFlag(f, "slots"), s.value = e.system.slots.value) : await e.system.parent.setFlag(f, "slots", c);
+    return s.classList.add("better-items-slots"), s.type = "number", s.min = "0", s.value = e.system.slots.value, s.addEventListener("focusout", async (r) => {
+      const l = r.target.value ?? s.value, p = parseInt(l);
+      Number.isNaN(p) ? (await e.system.parent.unsetFlag(y, "slots"), s.value = e.system.slots.value) : await e.system.parent.setFlag(y, "slots", p);
     }), t.replaceChildren(i, s), t;
   }
   static getIfEquippedInputComponent(e) {
@@ -298,9 +310,9 @@ class b {
     const i = document.createElement("label");
     i.innerHTML = "If Equipped";
     const s = document.createElement("input");
-    return s.classList.add("better-items-slots"), s.type = "number", s.min = "0", s.value = e.system.slots.ifEquipped, s.addEventListener("focusout", async (a) => {
-      const p = a.target.value ?? s.value, c = parseInt(p);
-      Number.isNaN(c) ? (await e.system.parent.unsetFlag(f, "ifEquipped"), s.value = e.system.slots.ifEquipped) : await e.system.parent.setFlag(f, "ifEquipped", c);
+    return s.classList.add("better-items-slots"), s.type = "number", s.min = "0", s.value = e.system.slots.ifEquipped, s.addEventListener("focusout", async (r) => {
+      const l = r.target.value ?? s.value, p = parseInt(l);
+      Number.isNaN(p) ? (await e.system.parent.unsetFlag(y, "ifEquipped"), s.value = e.system.slots.ifEquipped) : await e.system.parent.setFlag(y, "ifEquipped", p);
     }), t.replaceChildren(i, s), t;
   }
   static injectWeightValue(e, t) {
@@ -313,8 +325,8 @@ class b {
     const i = e.querySelector("div.tidy-tab.details");
     if (!i) return;
     const s = i.querySelectorAll("input.better-items-slots");
-    for (const a of s)
-      a.disabled = !t.unlocked;
+    for (const r of s)
+      r.disabled = !t.unlocked;
   }
 }
 var C, z, Z, K;
@@ -330,62 +342,62 @@ C = new WeakSet(), z = function({ value: e, ifEquipped: t }) {
   const i = t === null ? "" : ` (${t} if equipped)`;
   return `${e}${i}`;
 }, Z = function(e, t) {
-  var l;
+  var o;
   const i = e.querySelector("div.tidy-tab.details");
   if (i.querySelector(".better-items-slots-group"))
     return;
-  const s = (l = i.querySelector(".form-group label[for$='-weight-value']")) == null ? void 0 : l.closest(".form-group");
+  const s = (o = i.querySelector(".form-group label[for$='-weight-value']")) == null ? void 0 : o.closest(".form-group");
   if (!s) return;
   s.classList.add("better-items-slots-group");
-  const a = s.querySelector("label");
-  a && (a.innerHTML = "Slots");
-  const p = s.querySelector("div.form-fields");
-  if (!p) return;
-  const c = b.getSlotsInputComponent(t), o = b.getIfEquippedInputComponent(t), d = document.createElement("div");
+  const r = s.querySelector("label");
+  r && (r.innerHTML = "Slots");
+  const l = s.querySelector("div.form-fields");
+  if (!l) return;
+  const p = b.getSlotsInputComponent(t), c = b.getIfEquippedInputComponent(t), d = document.createElement("div");
   d.classList.add("form-group", "label-top");
-  const r = document.createElement("label");
-  r.innerHTML = "Capacity";
+  const a = document.createElement("label");
+  a.innerHTML = "Capacity";
   const n = document.createElement("input");
   n.classList.add("better-items-slots"), n.type = "number", n.min = "1", n.value = t.system.slots.capacity.max, n.addEventListener("focusout", async (m) => {
-    const y = m.target.value ?? n.value, h = parseInt(y);
-    Number.isNaN(h) ? (await t.system.parent.unsetFlag(f, "maxCapacity"), n.value = t.system.slots.capacity.max) : await t.system.parent.setFlag(f, "maxCapacity", h);
-  }), d.replaceChildren(r, n), p.replaceChildren(c, o, d);
+    const f = m.target.value ?? n.value, h = parseInt(f);
+    Number.isNaN(h) ? (await t.system.parent.unsetFlag(y, "maxCapacity"), n.value = t.system.slots.capacity.max) : await t.system.parent.setFlag(y, "maxCapacity", h);
+  }), d.replaceChildren(a, n), l.replaceChildren(p, c, d);
 }, K = function(e, t) {
   const i = e.querySelectorAll("fieldset"), s = Array.from(i).find(
     (n) => {
-      var l;
-      return (l = n.querySelector("legend")) == null ? void 0 : l.textContent.trim().startsWith("Capacity");
+      var o;
+      return (o = n.querySelector("legend")) == null ? void 0 : o.textContent.trim().startsWith("Capacity");
     }
   );
   s && s.remove();
-  const a = e.querySelectorAll("li.pill"), p = Array.from(a).find((n) => n.textContent.trim().startsWith("Holds"));
-  p && (p.textContent = `Holds ${t.system.slots.capacity.max} Slots`);
-  const c = e.querySelector("span.capacity-value.text-data");
-  if (c) {
+  const r = e.querySelectorAll("li.pill"), l = Array.from(r).find((n) => n.textContent.trim().startsWith("Holds"));
+  l && (l.textContent = `Holds ${t.system.slots.capacity.max} Slots`);
+  const p = e.querySelector("span.capacity-value.text-data");
+  if (p) {
     const n = t.system.slotCapacity;
-    ge(n) ? n.then((l) => {
-      c.innerHTML = l;
-    }) : c.innerHTML = t.system.slotCapacity;
+    ge(n) ? n.then((o) => {
+      p.innerHTML = o;
+    }) : p.innerHTML = t.system.slotCapacity;
   }
-  const o = e.querySelector("span.capacity-max.text-data");
-  o && (o.innerHTML = t.system.slots.capacity.max);
+  const c = e.querySelector("span.capacity-max.text-data");
+  c && (c.innerHTML = t.system.slots.capacity.max);
   const d = e.querySelectorAll(".meter.progress.capacity");
   for (const n of d)
     n.remove();
-  const r = e.querySelectorAll('div[data-tidy-column-key="capacityBar"]');
-  for (const n of r)
+  const a = e.querySelectorAll('div[data-tidy-column-key="capacityBar"]');
+  for (const n of a)
     n.style.display = "none";
   e.querySelectorAll('[data-tidy-column-key="weight"]').forEach((n) => {
     n.textContent.trim() === "Weight" && (n.textContent = "Slots");
   }), e.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach(async (n) => {
-    const l = n.closest("[data-item-id]");
-    if (!l) return;
-    const m = l.dataset.itemId, y = await t.system.getContainedItem(m), h = y.system.slots.tiny ? Math.ceil(y.system.quantity / 100) : y.system.slots.resolvedValue, v = "slot" + (h > 1 ? "s" : "");
+    const o = n.closest("[data-item-id]");
+    if (!o) return;
+    const m = o.dataset.itemId, f = await t.system.getContainedItem(m), h = f.system.slots.tiny ? Math.ceil(f.system.quantity / 100) : f.system.slots.resolvedValue, v = "slot" + (h > 1 ? "s" : "");
     n.innerHTML = `<span>${h} <span class="color-text-lighter">${v}</span></span>`;
   }), e.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (n) => {
-    const l = n.closest("[data-item-id]");
-    if (!l) return;
-    const m = l.dataset.itemId, y = await t.system.getContainedItem(m), h = await y.system.slotCapacity, v = y.system.slots.capacity.max;
+    const o = n.closest("[data-item-id]");
+    if (!o) return;
+    const m = o.dataset.itemId, f = await t.system.getContainedItem(m), h = await f.system.slotCapacity, v = f.system.slots.capacity.max;
     n.innerHTML = `
       <div class="inline-container-capacity-tracker">
         <div class="label">
@@ -397,96 +409,96 @@ C = new WeakSet(), z = function({ value: e, ifEquipped: t }) {
       </div>
     `;
   });
-}, q(Y, C);
-var E, te, se, ne;
+}, E(Y, C);
+var q, te, se, ne;
 class ee {
   /**
    * Render the TidyItemSheet changes
    */
   static render(e, t) {
-    g(this, E, ne).call(this, e, t), g(this, E, te).call(this, e, t), b.injectWeightValue(e, g(this, E, se).call(this, t.system.slots)), b.toggleSlotsDetailsLock(e, t);
+    g(this, q, ne).call(this, e, t), g(this, q, te).call(this, e, t), b.injectWeightValue(e, g(this, q, se).call(this, t.system.slots)), b.toggleSlotsDetailsLock(e, t);
   }
 }
-E = new WeakSet(), te = async function(e, t) {
+q = new WeakSet(), te = async function(e, t) {
   const i = t.data.type;
   if (!["weapon", "equipment"].includes(i)) return;
-  const s = t.data.system, a = Array.from(e.querySelectorAll("div")).find(
-    (r) => {
-      var n, l;
-      return ((l = (n = r.querySelector("h4")) == null ? void 0 : n.textContent) == null ? void 0 : l.trim()) === "Action";
+  const s = t.data.system, r = Array.from(e.querySelectorAll("div")).find(
+    (a) => {
+      var n, o;
+      return ((o = (n = a.querySelector("h4")) == null ? void 0 : n.textContent) == null ? void 0 : o.trim()) === "Action";
     }
   );
-  if (!a) return;
-  const p = a.querySelector("ul.pills.stacked");
-  if (!p) return;
-  p.querySelectorAll("li.pill").forEach(async (r) => {
-    var l;
-    const n = (l = r.textContent) == null ? void 0 : l.trim();
+  if (!r) return;
+  const l = r.querySelector("ul.pills.stacked");
+  if (!l) return;
+  l.querySelectorAll("li.pill").forEach(async (a) => {
+    var o;
+    const n = (o = a.textContent) == null ? void 0 : o.trim();
     if (de.test(n)) {
-      const m = await L("range", "Range");
-      r.replaceChildren(m, n);
+      const m = await M("range", "Range");
+      a.replaceChildren(m, n);
     }
   });
-  const c = Array.from(e.querySelectorAll("div")).find(
-    (r) => {
-      var n, l;
-      return ((l = (n = r.querySelector("h4")) == null ? void 0 : n.textContent) == null ? void 0 : l.trim()) === "Properties";
+  const p = Array.from(e.querySelectorAll("div")).find(
+    (a) => {
+      var n, o;
+      return ((o = (n = a.querySelector("h4")) == null ? void 0 : n.textContent) == null ? void 0 : o.trim()) === "Properties";
     }
   );
+  if (!p) return;
+  const c = p.querySelector("ul.pills.stacked");
   if (!c) return;
-  const o = c.querySelector("ul.pills.stacked");
-  if (!o) return;
-  if (o.querySelectorAll("li.pill").forEach(async (r) => {
-    var y;
-    const n = (y = r.textContent) == null ? void 0 : y.trim(), l = n.toLowerCase() ?? "";
-    if (!(l in { ...V, ...F }))
+  if (c.querySelectorAll("li.pill").forEach(async (a) => {
+    var f;
+    const n = (f = a.textContent) == null ? void 0 : f.trim(), o = n.toLowerCase() ?? "";
+    if (!(o in { ...F, ...O }))
       return;
-    const m = await L(l, n);
-    switch (l) {
+    const m = await M(o, n);
+    switch (o) {
       case "versatile":
         const h = s.damage.base.number, v = me(s.damage.base.denomination);
-        r.replaceChildren(
+        a.replaceChildren(
           m,
           document.createTextNode(` (${h}d${v})`)
         );
         break;
       case "ammunition":
       case "thrown":
-        const S = s.range.value, T = s.range.long, D = s.range.units;
-        let M = null;
+        const w = s.range.value, I = s.range.long, N = s.range.units;
+        let L = null;
         if (s.ammunition.type) {
-          const ae = s.ammunition.type, [re, le] = ue[ae], oe = await foundry.applications.ux.TextEditor.enrichHTML(
-            `@UUID[${le}]{${re}}`
-          ), N = document.createElement("template");
-          N.innerHTML = oe.trim(), M = N.content.firstElementChild;
+          const re = s.ammunition.type, [ae, oe] = ue[re], le = await foundry.applications.ux.TextEditor.enrichHTML(
+            `@UUID[${oe}]{${ae}}`
+          ), P = document.createElement("template");
+          P.innerHTML = le.trim(), L = P.content.firstElementChild;
         }
-        const H = document.createElement("span");
-        M ? H.replaceChildren(`(${S}/${T} ${D}, `, M, ")") : H.replaceChildren(`(${S}/${T} ${D})`), r.replaceChildren(m, H);
+        const $ = document.createElement("span");
+        L ? $.replaceChildren(`(${w}/${I} ${N}, `, L, ")") : $.replaceChildren(`(${w}/${I} ${N})`), a.replaceChildren(m, $);
         break;
       case "reload":
         const ie = s.uses.max;
-        r.replaceChildren(m, document.createTextNode(` (${ie} shots)`));
+        a.replaceChildren(m, document.createTextNode(` (${ie} shots)`));
         break;
       default:
-        r.replaceChildren(m);
+        a.replaceChildren(m);
     }
   }), console.log(s), ["automatic-rifle"].includes(s.identifier)) {
-    const r = await L("burst-fire", "Burst Fire");
-    o.insertAdjacentHTML("beforeend", `<li class="pill centered mastery">${r.outerHTML}</li>`);
+    const a = await M("burst-fire", "Burst Fire");
+    c.insertAdjacentHTML("beforeend", `<li class="pill centered mastery">${a.outerHTML}</li>`);
   }
   const d = s.mastery;
   if (d && !e.querySelector("li.mastery")) {
-    const r = await L(d, he(d));
-    o.insertAdjacentHTML(
+    const a = await M(d, he(d));
+    c.insertAdjacentHTML(
       "beforeend",
-      `<li class="pill centered mastery"><span class="text-normal">Mastery</span> ${r.outerHTML}</li>`
+      `<li class="pill centered mastery"><span class="text-normal">Mastery</span> ${a.outerHTML}</li>`
     );
   }
 }, se = function({ value: e, stack: t, tiny: i, ifEquipped: s }) {
   if (i)
     return "Tiny";
-  const a = t === 1 ? "" : ` (Stack: x${t})`, p = s === null ? "" : ` (${s} if equipped)`;
-  return `${e}${p}${a}`;
+  const r = t === 1 ? "" : ` (Stack: x${t})`, l = s === null ? "" : ` (${s} if equipped)`;
+  return `${e}${l}${r}`;
 }, ne = function(e, t) {
   var h;
   const i = e.querySelector("div.tidy-tab.details");
@@ -495,29 +507,29 @@ E = new WeakSet(), te = async function(e, t) {
   const s = (h = i.querySelector(".form-group label[for$='-weight-value']")) == null ? void 0 : h.closest(".form-group");
   if (!s) return;
   s.classList.add("better-items-slots-group");
-  const a = s.querySelector("label");
-  a && (a.innerHTML = "Slots");
-  const p = s.querySelector("div.form-fields");
-  if (!p) return;
-  const c = b.getSlotsInputComponent(t), o = b.getIfEquippedInputComponent(t), d = document.createElement("div");
+  const r = s.querySelector("label");
+  r && (r.innerHTML = "Slots");
+  const l = s.querySelector("div.form-fields");
+  if (!l) return;
+  const p = b.getSlotsInputComponent(t), c = b.getIfEquippedInputComponent(t), d = document.createElement("div");
   d.classList.add("form-group", "label-top");
-  const r = document.createElement("label");
-  r.innerHTML = "Stack";
+  const a = document.createElement("label");
+  a.innerHTML = "Stack";
   const n = document.createElement("input");
   n.classList.add("better-items-slots"), n.type = "number", n.min = "1", n.value = t.system.slots.stack, n.addEventListener("focusout", async (v) => {
-    const S = v.target.value ?? n.value, T = parseInt(S);
-    Number.isNaN(T) ? (await t.system.parent.unsetFlag(f, "stack"), n.value = t.system.slots.stack) : await t.system.parent.setFlag(f, "stack", T);
-  }), d.replaceChildren(r, n);
-  const l = document.createElement("div");
-  l.classList.add("form-group", "label-top"), l.style.alignSelf = "flex-start";
+    const w = v.target.value ?? n.value, I = parseInt(w);
+    Number.isNaN(I) ? (await t.system.parent.unsetFlag(y, "stack"), n.value = t.system.slots.stack) : await t.system.parent.setFlag(y, "stack", I);
+  }), d.replaceChildren(a, n);
+  const o = document.createElement("div");
+  o.classList.add("form-group", "label-top"), o.style.alignSelf = "flex-start";
   const m = document.createElement("label");
   m.innerHTML = "Tiny";
-  const y = document.createElement("input");
-  y.classList.add("better-items-slots"), y.type = "checkbox", y.checked = t.system.slots.tiny, y.addEventListener("change", async (v) => {
-    const S = v.target.checked;
-    await t.system.parent.setFlag(f, "tiny", S);
-  }), l.replaceChildren(m, y), p.replaceChildren(c, d, o, l);
-}, q(ee, E);
+  const f = document.createElement("input");
+  f.classList.add("better-items-slots"), f.type = "checkbox", f.checked = t.system.slots.tiny, f.addEventListener("change", async (v) => {
+    const w = v.target.checked;
+    await t.system.parent.setFlag(y, "tiny", w);
+  }), o.replaceChildren(m, f), l.replaceChildren(p, d, c, o);
+}, E(ee, q);
 Hooks.once("init", () => {
   if (!game || !game.settings) return;
   const u = dnd5e.dataModels.item.ContainerData;
@@ -526,7 +538,7 @@ Hooks.once("init", () => {
       return A.getContainerCapacity(this);
     },
     configurable: !0
-  }), game.settings.register(f, "enableTooltips", {
+  }), game.settings.register(y, "enableTooltips", {
     name: "Enable Property Tooltips",
     hint: "If enabled, item property pills will be replaced with rule reference tooltips.",
     scope: "client",
@@ -536,16 +548,16 @@ Hooks.once("init", () => {
   });
   for (const e of ["LootData", "WeaponData", "EquipmentData", "ToolData", "ConsumableData"])
     libWrapper.register(
-      f,
+      y,
       `dnd5e.dataModels.item.${e}.prototype.prepareDerivedData`,
       function(t, ...i) {
         let s = t(...i);
-        return U.prepareDerivedData(this), s;
+        return D.prepareDerivedData(this), s;
       },
       "MIXED"
     );
   libWrapper.register(
-    f,
+    y,
     "dnd5e.dataModels.item.ContainerData.prototype.prepareDerivedData",
     function(e, ...t) {
       let i = e(...t);
@@ -553,11 +565,19 @@ Hooks.once("init", () => {
     },
     "MIXED"
   ), libWrapper.register(
-    f,
+    y,
+    "dnd5e.dataModels.abstract.ItemDataModel.prototype.richTooltip",
+    async function(e, ...t) {
+      let { content: i, classes: s } = await e(...t);
+      return { content: await D.updateRichTooltip(this, i), classes: s };
+    },
+    "MIXED"
+  ), libWrapper.register(
+    y,
     "dnd5e.dataModels.actor.CharacterData.prototype.prepareDerivedData",
     function(e, ...t) {
       let i = e(...t);
-      return O.prepareDerivedData(this), i;
+      return B.prepareDerivedData(this), i;
     },
     "MIXED"
   );

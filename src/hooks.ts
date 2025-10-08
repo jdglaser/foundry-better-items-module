@@ -57,6 +57,17 @@ Hooks.once("init", () => {
 
   libWrapper.register(
     MODULE_ID,
+    "dnd5e.dataModels.abstract.ItemDataModel.prototype.richTooltip",
+    async function (wrapped: any, ...args: any) {
+      let { content, classes } = await wrapped(...args);
+      const newContent = await ItemData.updateRichTooltip(this, content);
+      return { content: newContent, classes };
+    },
+    "MIXED"
+  );
+
+  libWrapper.register(
+    MODULE_ID,
     "dnd5e.dataModels.actor.CharacterData.prototype.prepareDerivedData",
     function (wrapped: any, ...args: any) {
       let result = wrapped(...args);

@@ -13,6 +13,13 @@
       "path": "packs/rules-reference.db",
       "type": "JournalEntry",
       "system": "dnd5e"
+    },
+    {
+      "name": "items",
+      "label": "Items",
+      "path": "packs/items.db",
+      "type": "Item",
+      "system": "dnd5e"
     }
   ],
   "packFolders": [
@@ -20,7 +27,7 @@
       "name": "D&D 5e Better Items",
       "color": "#007BAC",
       "sorting": "m",
-      "packs": ["rules-reference"]
+      "packs": ["rules-reference", "items"]
     }
   ],
   "relationships": {

@@ -14,6 +14,30 @@ export class ItemData {
   /**
    * Resolve item slots for item
    */
+  static async updateRichTooltip(data: any, content: string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const weightDiv = doc.querySelector(".weight");
+    if (weightDiv) {
+      const span = weightDiv.querySelector("span");
+      if (span) {
+        if (data.slots.tiny) {
+          span.textContent = "Tiny";
+        } else if (data.slots.stack !== data.slots.resolvedValue) {
+          span.textContent = `${data.slots.resolvedValue} (x${data.slots.stack})`;
+        } else {
+          span.textContent = data.slots.resolvedValue;
+        }
+      }
+    }
+    return doc.body.innerHTML.trim();
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Resolve item slots for item
+   */
   static #resolveItemSlots(data: any) {
     const valueOverride = data.parent.getFlag(MODULE_ID, "slots");
     const stackOverride = data.parent.getFlag(MODULE_ID, "stack");
