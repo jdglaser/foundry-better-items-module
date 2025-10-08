@@ -59,6 +59,7 @@ export class ItemData {
    * Resolve default item slots for item
    */
   static #resolveDefaultItemSlots(itemData: any, parentData: any, systemData: any) {
+    console.log("itemData:", itemData);
     let stack = 1;
     let value = 1;
     let tiny = false;
@@ -86,7 +87,11 @@ export class ItemData {
     if (parentData.type === "equipment" && itemData.type) {
       switch (itemData.type.value) {
         case "heavy":
-          value = 2;
+          if (["plate-armor", "splint-armor"].includes(itemData.identifier)) {
+            value = 3;
+          } else {
+            value = 2;
+          }
           break;
         case "medium":
           value = 2;
@@ -97,16 +102,59 @@ export class ItemData {
       }
     }
 
+    if (["gunpowder-keg"].includes(itemData.identifier)) {
+      value = 2;
+    }
+
+    if (["ladder"].includes(itemData.identifier)) {
+      value = 3;
+    }
+
     if (parentData.type === "weapon") {
       if (["hvy", "two"].some((prop) => itemData.properties.has(prop))) value = 2;
     }
 
-    // 0 if equipped
-    if (["clothes-fine", "clothes-travelers", "fine-clothes"].includes(itemData.identifier)) ifEquipped = 0;
+    if (
+      ["clothes-fine", "clothes-travelers", "fine-clothes", "costume"].includes(itemData.identifier) ||
+      itemData.identifier.startsWith("belt") ||
+      itemData.identifier.startsWith("boots") ||
+      itemData.identifier.startsWith("bracers") ||
+      itemData.identifier.includes("robe")
+    )
+      ifEquipped = 0;
 
     if (["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(itemData.identifier)) value = 0;
 
-    if (itemData.type && ["gem", "ring"].includes(itemData.type.value)) tiny = true;
+    if (
+      (itemData.type && ["gem", "ring"].includes(itemData.type.value)) ||
+      ["string"].includes(itemData.identifier) ||
+      itemData.identifier.startsWith("figurine") ||
+      itemData.identifier.includes("ioun-stone") ||
+      itemData.identifier.includes("amulet") ||
+      itemData.identifier.startsWith("bead-")
+    )
+      tiny = true;
+
+    if (["candle", "torch", "rations"].includes(itemData.identifier)) {
+      stack = 5;
+    }
+
+    if (["tent"].includes(itemData.identifier)) {
+      value = 2;
+    }
+
+    if (itemData.type && ["potion", "poison"].includes(itemData.type.value)) {
+      stack = 3;
+    }
+
+    if (
+      (itemData.type && itemData.type.value === "scroll") ||
+      ["scroll", "map", "parchment", "paper"].includes(itemData.identifier)
+    ) {
+      stack = 20;
+    }
+
+    // TODO: More defaults, but I'm all done
 
     return {
       value,

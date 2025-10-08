@@ -29,6 +29,7 @@ export default defineConfig({
         const dest = resolve(FOUNDRY_DATA, "modules", MODULE_ID);
         await copy("dist", dest, { overwrite: true });
         await copy("public", dest, { overwrite: true });
+        await copy(dest + "/packs/rules-reference", "dist/packs/rules-reference", { overwrite: true });
         console.log(`✅ Copied build to Foundry modules/${MODULE_ID}`);
       },
     },

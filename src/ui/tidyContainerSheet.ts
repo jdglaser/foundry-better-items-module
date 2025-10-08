@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../constants";
 import { ContainerSlots } from "../types";
+import { isPromise } from "../utils";
 import { Shared } from "./shared";
 
 export class TidyContainerSheet {
@@ -107,7 +108,16 @@ export class TidyContainerSheet {
 
     // Update the capacity counter
     const capacityValueText = html.querySelector("span.capacity-value.text-data");
-    if (capacityValueText) capacityValueText.innerHTML = data.system.slotCapacity;
+    if (capacityValueText) {
+      const slotCapacity = data.system.slotCapacity;
+      if (isPromise(slotCapacity)) {
+        slotCapacity.then((value) => {
+          capacityValueText.innerHTML = value;
+        });
+      } else {
+        capacityValueText.innerHTML = data.system.slotCapacity;
+      }
+    }
 
     const capacityMaxText = html.querySelector("span.capacity-max.text-data");
     if (capacityMaxText) capacityMaxText.innerHTML = data.system.slots.capacity.max;
@@ -130,13 +140,12 @@ export class TidyContainerSheet {
         el.textContent = "Slots";
       }
     });
-    data.system.contents.forEach((c: any) => console.log("CONTENT ITEM:", c));
-    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((el) => {
+    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach(async (el) => {
       const row = el.closest("[data-item-id]") as HTMLElement | null;
       if (!row) return;
 
       const itemId = row.dataset.itemId;
-      const item = data.system.getContainedItem(itemId);
+      const item = await data.system.getContainedItem(itemId);
 
       const slotValue = item.system.slots.tiny
         ? Math.ceil(item.system.quantity / 100)
@@ -146,15 +155,15 @@ export class TidyContainerSheet {
     });
 
     // Replace container capacity tracker cells
-    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach((el) => {
+    html.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (el) => {
       const row = el.closest("[data-item-id]") as HTMLElement | null;
       if (!row) return;
 
       const itemId = row.dataset.itemId;
-      const item = data.system.getContainedItem(itemId);
+      const item = await data.system.getContainedItem(itemId);
 
       // Grab slots
-      const used = item.system.slotCapacity;
+      const used = await item.system.slotCapacity;
       const max = item.system.slots.capacity.max;
 
       // Replace HTML

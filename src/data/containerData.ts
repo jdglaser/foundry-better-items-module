@@ -15,14 +15,15 @@ export class ContainerData {
    * Getter method for resolving container capacity slots. Needs to be a getter to avoid race conditions encountered
    * when using prepareDerivedData
    */
-  static getContainerCapacity(data: any) {
-    const contents = data.contents ?? [];
+  static async getContainerCapacity(data: any) {
+    const contents = (await data.contents) ?? [];
     let totalSlots = 0;
     const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
     let tinyItems = cp + sp + ep + gp + pp;
     for (const item of contents) {
       if (item.type === "container") {
-        totalSlots += item.system.slotCapacity + item.system.slots.resolvedValue;
+        const capacity = await item.system.slotCapacity;
+        totalSlots += capacity;
       } else if (item.system.slots.tiny) {
         tinyItems += item.system.quantity;
       } else {
@@ -81,11 +82,15 @@ export class ContainerData {
    * Resolves default slot data for containers
    */
   static #resolveDefaultContainerSlots(data: any, parent: any, systemData: any) {
+    let ifEquipped = null;
+    let value = 1;
+    let maxCapacity = 10;
+
     // TODO
     return {
-      value: 1,
-      ifEquipped: null,
-      maxCapacity: 10,
+      value,
+      ifEquipped,
+      maxCapacity,
     };
   }
 }

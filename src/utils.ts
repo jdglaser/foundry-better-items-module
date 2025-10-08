@@ -30,3 +30,7 @@ export async function getDocumentReferenceHtml(key: string, label: string) {
 export function titleCase(str: string) {
   return str.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+export function isPromise(value: any): value is Promise<any> {
+  return typeof value.then === "function";
+}
