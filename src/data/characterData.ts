@@ -51,6 +51,7 @@ export class CharacterData {
    * Resolve slot based encumberance data for Character
    */
   static async #resolveSlotBasedEnumberance(data: any) {
+    console.log("ACTOR:", data);
     const allItems = [
       ...data.parent.itemTypes.equipment,
       ...data.parent.itemTypes.consumable,
@@ -63,6 +64,15 @@ export class CharacterData {
     const { cp = 0, sp = 0, ep = 0, gp = 0, pp = 0 } = data.currency;
     let tinyItems = cp + sp + ep + gp + pp;
     for (const item of allItems) {
+      if (item.system.container) {
+        const containerItem = data.parent.collections.items.get(item.system.container);
+        console.log("CONTAINERITEM:", containerItem);
+        if (containerItem.system.properties.has("weightlessContents")) {
+          console.log("WEIGHTLESS:", item);
+          continue;
+        }
+      }
+
       if (item.system.slots.tiny) {
         tinyItems += item.system.quantity;
       } else {

@@ -2,9 +2,9 @@ var V = (u) => {
   throw TypeError(u);
 };
 var ce = (u, e, t) => e.has(u) || V("Cannot " + t);
-var E = (u, e, t) => e.has(u) ? V("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(u) : e.set(u, t);
+var q = (u, e, t) => e.has(u) ? V("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(u) : e.set(u, t);
 var g = (u, e, t) => (ce(u, e, "access private method"), t);
-const y = "dnd5e-item-improvements", pe = `Compendium.${y}.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage`, F = {
+const y = "dnd5e-item-improvements", pe = `Compendium.${y}.rules-reference.JournalEntry.Q4VqflHKEdN7z8Qv.JournalEntryPage`, O = {
   cleave: "2GQhl3IJLZGyuHow",
   graze: "mDnObAO0FapBEe7W",
   nick: "HAkYfqwjw3afUReb",
@@ -13,7 +13,7 @@ const y = "dnd5e-item-improvements", pe = `Compendium.${y}.rules-reference.Journ
   slow: "Ily8fxxcCqnZw7bV",
   topple: "fVcGobRFtXrAXPRI",
   vex: "UYnxxrKjfBE5UBl0"
-}, O = {
+}, F = {
   ammunition: "pAMRJM7AtX2HHdCs",
   finesse: "WJFU13zVwyLNRa8A",
   heavy: "H8FtHo6Rtf5qcVTO",
@@ -34,16 +34,16 @@ const y = "dnd5e-item-improvements", pe = `Compendium.${y}.rules-reference.Journ
   energyCell: ["Energy Cell", ""],
   blowgunNeedle: ["Needle", "Compendium.dnd-players-handbook.equipment.Item.phbamoNeedles000"]
 }, de = /^\d+\/\d+\s*ft$/i;
-var S, R, W;
-class B {
+var S, W, B;
+class R {
   /**
    * Prepare derived CharacterData
    */
   static async prepareDerivedData(e) {
-    g(this, S, W).call(this, e), g(this, S, R).call(this, e);
+    g(this, S, B).call(this, e), g(this, S, W).call(this, e);
   }
 }
-S = new WeakSet(), R = async function(e) {
+S = new WeakSet(), W = async function(e) {
   const t = e.attributes.ac, { armors: i, shields: s } = e.parent.itemTypes.equipment.reduce(
     (p, c) => (!c.system.equipped || !(c.system.type.value in CONFIG.DND5E.armorTypes) || (c.system.type.value === "shield" ? p.shields.push(c) : p.armors.push(c)), p),
     { armors: [], shields: [] }
@@ -53,7 +53,8 @@ S = new WeakSet(), R = async function(e) {
   i.forEach((p) => {
     p.system.proficiencyMultiplier === 0 && (l = !0);
   }), l && (e.attributes.movement.walk -= 10);
-}, W = async function(e) {
+}, B = async function(e) {
+  console.log("ACTOR:", e);
   const t = [
     ...e.parent.itemTypes.equipment,
     ...e.parent.itemTypes.consumable,
@@ -64,20 +65,28 @@ S = new WeakSet(), R = async function(e) {
   let i = 0;
   const { cp: s = 0, sp: r = 0, ep: l = 0, gp: p = 0, pp: c = 0 } = e.currency;
   let d = s + r + l + p + c;
-  for (const a of t)
+  for (const a of t) {
+    if (a.system.container) {
+      const n = e.parent.collections.items.get(a.system.container);
+      if (console.log("CONTAINERITEM:", n), n.system.properties.has("weightlessContents")) {
+        console.log("WEIGHTLESS:", a);
+        continue;
+      }
+    }
     a.system.slots.tiny ? d += a.system.quantity : i += a.system.slots.resolvedValue;
+  }
   i += Math.ceil(d / 100), e.slotBasedEncumberance = {
     value: i,
     max: e.abilities.str.value + 10
   };
-}, E(B, S);
-var x, G, U;
+}, q(R, S);
+var T, G, U;
 class A {
   /**
    * Prepare derived ItemData
    */
   static prepareDerivedData(e) {
-    g(this, x, G).call(this, e);
+    g(this, T, G).call(this, e);
   }
   /* -------------------------------------------- */
   /**
@@ -97,12 +106,12 @@ class A {
     return i += Math.ceil(d / 100), i;
   }
 }
-x = new WeakSet(), G = function(e) {
+T = new WeakSet(), G = function(e) {
   const t = e.parent.getFlag(y, "slots"), i = e.parent.getFlag(y, "ifEquipped"), s = e.parent.getFlag(y, "maxCapacity"), r = e.parent, l = r.system, {
     value: p,
     ifEquipped: c,
     maxCapacity: d
-  } = g(this, x, U).call(this, e, r, l), a = t ?? p, n = i ?? c, o = s ?? d;
+  } = g(this, T, U).call(this, e, r, l), a = t ?? p, n = i ?? c, o = s ?? d;
   let m = e.quantity * a;
   n !== null && e.equipped && (m = e.quantity * n);
   const f = {
@@ -120,14 +129,14 @@ x = new WeakSet(), G = function(e) {
     ifEquipped: null,
     maxCapacity: 10
   };
-}, E(A, x);
-var k, j, X;
+}, q(A, T);
+var x, j, X;
 class D {
   /**
    * Prepare derived ItemData
    */
   static prepareDerivedData(e) {
-    g(this, k, j).call(this, e);
+    g(this, x, j).call(this, e);
   }
   /* -------------------------------------------- */
   /**
@@ -137,18 +146,18 @@ class D {
     const s = new DOMParser().parseFromString(t, "text/html"), r = s.querySelector(".weight");
     if (r) {
       const l = r.querySelector("span");
-      l && (e.slots.tiny ? l.textContent = "Tiny" : e.slots.stack !== e.slots.resolvedValue ? l.textContent = `${e.slots.resolvedValue} (x${e.slots.stack})` : l.textContent = e.slots.resolvedValue);
+      l && (e.slots.tiny ? l.textContent = "Tiny" : e.slots.stack && e.slots.stack !== e.slots.resolvedValue ? l.textContent = `${e.slots.resolvedValue} (x${e.slots.stack})` : l.textContent = e.slots.resolvedValue);
     }
     return s.body.innerHTML.trim();
   }
 }
-k = new WeakSet(), j = function(e) {
+x = new WeakSet(), j = function(e) {
   const t = e.parent.getFlag(y, "slots"), i = e.parent.getFlag(y, "stack"), s = e.parent.getFlag(y, "tiny"), r = e.parent.getFlag(y, "ifEquipped"), l = e.parent, p = l.system, {
     value: c,
     stack: d,
     tiny: a,
     ifEquipped: n
-  } = g(this, k, X).call(this, e, l, p), o = t ?? c, m = i ?? d, f = s ?? a, h = r ?? n;
+  } = g(this, x, X).call(this, e, l, p), o = t ?? c, m = i ?? d, f = s ?? a, h = r ?? n;
   let v = e.quantity * o;
   m > 1 && (v = Math.ceil(e.quantity / m) * o), h !== null && e.equipped && (v = e.quantity * h), e.slots = {
     value: o,
@@ -189,23 +198,23 @@ k = new WeakSet(), j = function(e) {
         r = 1;
         break;
     }
-  return ["gunpowder-keg"].includes(e.identifier) && (r = 2), ["ladder"].includes(e.identifier) && (r = 3), t.type === "weapon" && ["hvy", "two"].some((c) => e.properties.has(c)) && (r = 2), (["clothes-fine", "clothes-travelers", "fine-clothes", "costume"].includes(e.identifier) || e.identifier.startsWith("belt") || e.identifier.startsWith("boots") || e.identifier.startsWith("bracers") || e.identifier.includes("robe")) && (p = 0), ["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(e.identifier) && (r = 0), (e.type && ["gem", "ring"].includes(e.type.value) || ["string"].includes(e.identifier) || e.identifier.startsWith("figurine") || e.identifier.includes("ioun-stone") || e.identifier.includes("amulet") || e.identifier.startsWith("bead-")) && (l = !0), ["candle", "torch", "rations", "ink-pen", "lock"].includes(e.identifier) && (s = 5), ["tent"].includes(e.identifier) && (r = 2), e.type && ["potion", "poison"].includes(e.type.value) && (s = 3), (e.type && e.type.value === "scroll" || ["scroll", "map", "parchment", "paper"].includes(e.identifier)) && (s = 20), {
+  return ["gunpowder-keg"].includes(e.identifier) && (r = 2), ["ladder"].includes(e.identifier) && (r = 3), t.type === "weapon" && ["hvy", "two"].some((c) => e.properties.has(c)) && (r = 2), (["clothes-fine", "clothes-travelers", "fine-clothes", "costume"].includes(e.identifier) || e.identifier.startsWith("belt") || e.identifier.startsWith("boots") || e.identifier.startsWith("bracers") || e.identifier.includes("robe")) && (p = 0), ["improvised-weapon", "unarmed-strike", "clawed-gauntlet"].includes(e.identifier) && (r = 0), (e.type && ["gem", "ring"].includes(e.type.value) || ["string"].includes(e.identifier) || e.identifier.startsWith("figurine") || e.identifier.includes("ioun-stone") || e.identifier.includes("amulet") || e.identifier.startsWith("bead-")) && (l = !0), ["candle", "torch", "rations", "ink-pen", "lock"].includes(e.identifier) && (s = 3), ["tent"].includes(e.identifier) && (r = 2), e.type && ["potion", "poison"].includes(e.type.value) && (s = 3), ["parchment", "paper"].includes(e.identifier) && (s = 20), {
     value: r,
     stack: s,
     tiny: l,
     ifEquipped: p
   };
-}, E(D, k);
-var T, J, Q;
+}, q(D, x);
+var k, J, Q;
 class _ {
   /**
    * Render the TidyCharacterSheet changes
    */
   static render(e, t) {
-    g(this, T, J).call(this, e, t);
+    g(this, k, J).call(this, e, t);
   }
 }
-T = new WeakSet(), J = async function(e, t) {
+k = new WeakSet(), J = async function(e, t) {
   const i = e.querySelector("div.inventory-content");
   if (!i) return;
   const s = i.querySelector("div.encumbrance-details");
@@ -213,7 +222,7 @@ T = new WeakSet(), J = async function(e, t) {
   const { value: r, max: l } = t.system.slotBasedEncumberance;
   s.innerHTML = `
       <div class="pill flexshrink"><span class="text-normal">Strength</span> <span>${t.system.abilities.str.value}</span></div>
-      ${g(this, T, Q).call(this, r, l, "fas fa-weight-hanging", "Item Slots")}
+      ${g(this, k, Q).call(this, r, l, "fas fa-weight-hanging", "Item Slots")}
     `;
   const p = i.querySelectorAll(
     'div[data-tidy-column-key="capacityBar"]'
@@ -225,8 +234,13 @@ T = new WeakSet(), J = async function(e, t) {
   }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach((c) => {
     const d = c.closest("[data-item-id]");
     if (!d) return;
-    const a = d.dataset.itemId, n = t.actor.collections.items.get(a), o = n.system.slots.tiny ? Math.ceil(n.system.quantity / 100) : n.system.slots.resolvedValue, m = "slot" + (o === 1 ? "" : "s");
-    c.innerHTML = `<span>${o} <span class="color-text-lighter">${m}</span></span>`;
+    const a = d.dataset.itemId, n = t.actor.collections.items.get(a);
+    if (n.system.slots.tiny)
+      c.innerHTML = "<span>Tiny</span>";
+    else {
+      const o = n.system.slots.resolvedValue, m = "slot" + (o > 1 ? "s" : "");
+      c.innerHTML = `<span>${o} <span class="color-text-lighter">${m}</span></span>`;
+    }
   }), i.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (c) => {
     const d = c.closest("[data-item-id]");
     if (!d) return;
@@ -268,19 +282,19 @@ T = new WeakSet(), J = async function(e, t) {
           <i class="breakpoint encumbrance-high arrow-down" role="presentation"></i>
         </div>
     `;
-}, E(_, T);
-const H = [4, 6, 8, 10, 12, 20, 100];
+}, q(_, k);
+const $ = [4, 6, 8, 10, 12, 20, 100];
 function me(u, e = 1) {
-  return H[Math.min(H.indexOf(u) + e, H.length - 1)] ?? null;
+  return $[Math.min($.indexOf(u) + e, $.length - 1)] ?? null;
 }
 function ye(u) {
-  const e = { ...F, ...O }[u];
+  const e = { ...O, ...F }[u];
   return `${pe}.${e}`;
 }
 function fe(u, e) {
   return `@UUID[${ye(u)}]{${e}}`;
 }
-async function M(u, e) {
+async function L(u, e) {
   const t = await foundry.applications.ux.TextEditor.enrichHTML(fe(u, e)), i = document.createElement("template");
   i.innerHTML = t.trim();
   const s = i.content.firstElementChild, r = s.querySelector("i.fa-solid");
@@ -392,8 +406,13 @@ C = new WeakSet(), z = function({ value: e, ifEquipped: t }) {
   }), e.querySelectorAll('.tidy-table-cell[data-tidy-column-key="weight"]').forEach(async (n) => {
     const o = n.closest("[data-item-id]");
     if (!o) return;
-    const m = o.dataset.itemId, f = await t.system.getContainedItem(m), h = f.system.slots.tiny ? Math.ceil(f.system.quantity / 100) : f.system.slots.resolvedValue, v = "slot" + (h > 1 ? "s" : "");
-    n.innerHTML = `<span>${h} <span class="color-text-lighter">${v}</span></span>`;
+    const m = o.dataset.itemId, f = await t.system.getContainedItem(m);
+    if (f.system.slots.tiny)
+      n.innerHTML = "<span>Tiny</span>";
+    else {
+      const h = f.system.slots.resolvedValue, v = "slot" + (h > 1 ? "s" : "");
+      n.innerHTML = `<span>${h} <span class="color-text-lighter">${v}</span></span>`;
+    }
   }), e.querySelectorAll('.tidy-table-cell[data-tidy-column-key="capacityTracker"]').forEach(async (n) => {
     const o = n.closest("[data-item-id]");
     if (!o) return;
@@ -409,17 +428,17 @@ C = new WeakSet(), z = function({ value: e, ifEquipped: t }) {
       </div>
     `;
   });
-}, E(Y, C);
-var q, te, se, ne;
+}, q(Y, C);
+var E, te, se, ne;
 class ee {
   /**
    * Render the TidyItemSheet changes
    */
   static render(e, t) {
-    g(this, q, ne).call(this, e, t), g(this, q, te).call(this, e, t), b.injectWeightValue(e, g(this, q, se).call(this, t.system.slots)), b.toggleSlotsDetailsLock(e, t);
+    g(this, E, ne).call(this, e, t), g(this, E, te).call(this, e, t), b.injectWeightValue(e, g(this, E, se).call(this, t.system.slots)), b.toggleSlotsDetailsLock(e, t);
   }
 }
-q = new WeakSet(), te = async function(e, t) {
+E = new WeakSet(), te = async function(e, t) {
   const i = t.data.type;
   if (!["weapon", "equipment"].includes(i)) return;
   const s = t.data.system, r = Array.from(e.querySelectorAll("div")).find(
@@ -435,7 +454,7 @@ q = new WeakSet(), te = async function(e, t) {
     var o;
     const n = (o = a.textContent) == null ? void 0 : o.trim();
     if (de.test(n)) {
-      const m = await M("range", "Range");
+      const m = await L("range", "Range");
       a.replaceChildren(m, n);
     }
   });
@@ -451,9 +470,9 @@ q = new WeakSet(), te = async function(e, t) {
   if (c.querySelectorAll("li.pill").forEach(async (a) => {
     var f;
     const n = (f = a.textContent) == null ? void 0 : f.trim(), o = n.toLowerCase() ?? "";
-    if (!(o in { ...F, ...O }))
+    if (!(o in { ...O, ...F }))
       return;
-    const m = await M(o, n);
+    const m = await L(o, n);
     switch (o) {
       case "versatile":
         const h = s.damage.base.number, v = me(s.damage.base.denomination);
@@ -465,15 +484,15 @@ q = new WeakSet(), te = async function(e, t) {
       case "ammunition":
       case "thrown":
         const w = s.range.value, I = s.range.long, N = s.range.units;
-        let L = null;
+        let M = null;
         if (s.ammunition.type) {
           const re = s.ammunition.type, [ae, oe] = ue[re], le = await foundry.applications.ux.TextEditor.enrichHTML(
             `@UUID[${oe}]{${ae}}`
           ), P = document.createElement("template");
-          P.innerHTML = le.trim(), L = P.content.firstElementChild;
+          P.innerHTML = le.trim(), M = P.content.firstElementChild;
         }
-        const $ = document.createElement("span");
-        L ? $.replaceChildren(`(${w}/${I} ${N}, `, L, ")") : $.replaceChildren(`(${w}/${I} ${N})`), a.replaceChildren(m, $);
+        const H = document.createElement("span");
+        M ? H.replaceChildren(`(${w}/${I} ${N}, `, M, ")") : H.replaceChildren(`(${w}/${I} ${N})`), a.replaceChildren(m, H);
         break;
       case "reload":
         const ie = s.uses.max;
@@ -483,12 +502,12 @@ q = new WeakSet(), te = async function(e, t) {
         a.replaceChildren(m);
     }
   }), console.log(s), ["automatic-rifle"].includes(s.identifier)) {
-    const a = await M("burst-fire", "Burst Fire");
+    const a = await L("burst-fire", "Burst Fire");
     c.insertAdjacentHTML("beforeend", `<li class="pill centered mastery">${a.outerHTML}</li>`);
   }
   const d = s.mastery;
   if (d && !e.querySelector("li.mastery")) {
-    const a = await M(d, he(d));
+    const a = await L(d, he(d));
     c.insertAdjacentHTML(
       "beforeend",
       `<li class="pill centered mastery"><span class="text-normal">Mastery</span> ${a.outerHTML}</li>`
@@ -529,7 +548,7 @@ q = new WeakSet(), te = async function(e, t) {
     const w = v.target.checked;
     await t.system.parent.setFlag(y, "tiny", w);
   }), o.replaceChildren(m, f), l.replaceChildren(p, d, c, o);
-}, E(ee, q);
+}, q(ee, E);
 Hooks.once("init", () => {
   if (!game || !game.settings) return;
   const u = dnd5e.dataModels.item.ContainerData;
@@ -577,7 +596,7 @@ Hooks.once("init", () => {
     "dnd5e.dataModels.actor.CharacterData.prototype.prepareDerivedData",
     function(e, ...t) {
       let i = e(...t);
-      return B.prepareDerivedData(this), i;
+      return R.prepareDerivedData(this), i;
     },
     "MIXED"
   );

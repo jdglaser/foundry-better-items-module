@@ -147,11 +147,13 @@ export class TidyContainerSheet {
       const itemId = row.dataset.itemId;
       const item = await data.system.getContainedItem(itemId);
 
-      const slotValue = item.system.slots.tiny
-        ? Math.ceil(item.system.quantity / 100)
-        : item.system.slots.resolvedValue;
-      const slotLabel = "slot" + (slotValue > 1 ? "s" : "");
-      el.innerHTML = `<span>${slotValue} <span class="color-text-lighter">${slotLabel}</span></span>`;
+      if (item.system.slots.tiny) {
+        el.innerHTML = `<span>Tiny</span>`;
+      } else {
+        const slotValue = item.system.slots.resolvedValue;
+        const slotLabel = "slot" + (slotValue > 1 ? "s" : "");
+        el.innerHTML = `<span>${slotValue} <span class="color-text-lighter">${slotLabel}</span></span>`;
+      }
     });
 
     // Replace container capacity tracker cells

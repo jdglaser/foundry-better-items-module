@@ -23,7 +23,7 @@ export class ItemData {
       if (span) {
         if (data.slots.tiny) {
           span.textContent = "Tiny";
-        } else if (data.slots.stack !== data.slots.resolvedValue) {
+        } else if (data.slots.stack && data.slots.stack !== data.slots.resolvedValue) {
           span.textContent = `${data.slots.resolvedValue} (x${data.slots.stack})`;
         } else {
           span.textContent = data.slots.resolvedValue;
@@ -159,7 +159,7 @@ export class ItemData {
       tiny = true;
 
     if (["candle", "torch", "rations", "ink-pen", "lock"].includes(itemData.identifier)) {
-      stack = 5;
+      stack = 3;
     }
 
     if (["tent"].includes(itemData.identifier)) {
@@ -170,10 +170,7 @@ export class ItemData {
       stack = 3;
     }
 
-    if (
-      (itemData.type && itemData.type.value === "scroll") ||
-      ["scroll", "map", "parchment", "paper"].includes(itemData.identifier)
-    ) {
+    if (["parchment", "paper"].includes(itemData.identifier)) {
       stack = 20;
     }
 
